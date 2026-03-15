@@ -566,7 +566,9 @@ function switchTab(t){
   document.querySelectorAll('.nav-tab').forEach((el,i)=>el.classList.toggle('active',['projects','stash','patterns'][i]===t));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const pageId='page-'+(t==='stash'?'stash':t);
-  document.getElementById(pageId).classList.add('active');
+  const pageEl=document.getElementById(pageId);
+  pageEl.classList.remove('hidden');
+  pageEl.classList.add('active');
   if(t==='projects')renderProjects();
   if(t==='stash'){renderYarn();renderNeedles();renderAcquire();}
   if(t==='patterns')renderPatterns();
