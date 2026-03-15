@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Knitting Studio</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Jost:wght@300;400;500&display=swap');
 :root {
   --cream:#f5f0e8; --parchment:#fffdf7; --parchment-d:#f0e8d8;
   --ink:#3d3222; --ink-mid:#7a5c3a; --ink-light:#9a8068; --ink-faint:#c8b89a;
@@ -14,55 +14,64 @@
   --terra:#b87a72; --terra-light:#ecd4d0;
   --sand:#c8a882; --sand-light:#ede0cc;
   --sky:#7a9eb5; --sky-light:#ccdde8;
-  --lavender:#9b8ec4; --lavender-light:#e0d8f4;
+  --lav:#9b8ec4; --lav-light:#e4dff5;
   --border:#c8b89a; --border-soft:#e0d5c0;
-  --fd:'Fraunces',Georgia,serif; --fb:'Jost','Helvetica Neue',Arial,sans-serif;
+  --f-display:'Fraunces',Georgia,serif;
+  --f-body:'Jost','Helvetica Neue',Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--cream);font-family:var(--fb);font-weight:300;color:var(--ink);min-height:100vh;background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(180,155,110,0.07) 27px,rgba(180,155,110,0.07) 28px);}
+body{background:var(--cream);font-family:var(--f-body);font-weight:300;color:var(--ink);min-height:100vh;background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(180,155,110,0.07) 27px,rgba(180,155,110,0.07) 28px);}
+
+/* LOADING SCREEN */
+#loading-screen{position:fixed;inset:0;background:var(--parchment);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+#loading-screen.hidden{display:none;}
+.loading-title{font-family:var(--f-display);font-size:36px;font-weight:300;font-style:italic;color:var(--ink);}
+.loading-title em{font-style:normal;color:var(--terra);}
+.loading-sub{font-family:var(--f-body);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-light);}
+.loading-spinner{width:32px;height:32px;border:2px solid var(--border);border-top:2px solid var(--sage-dark);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
 /* HEADER */
-.app-header{background:var(--parchment);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;}
-.app-title{font-family:var(--fd);font-size:32px;font-weight:300;font-style:italic;color:var(--ink);letter-spacing:-0.5px;line-height:1;}
+.app-header{background:var(--parchment);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;}
+.app-title{font-family:var(--f-display);font-size:30px;font-weight:300;font-style:italic;color:var(--ink);letter-spacing:-0.5px;line-height:1;}
 .app-title em{font-style:normal;color:var(--terra);font-weight:400;}
-.header-actions{display:flex;gap:8px;}
-.btn-utility{font-family:var(--fb);font-size:11px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border:1px solid var(--border);background:transparent;color:var(--ink-mid);cursor:pointer;border-radius:2px;}
-.btn-utility:hover{background:var(--parchment-d);color:var(--ink);}
+.header-actions{display:flex;gap:8px;align-items:center;}
+.btn-utility{font-family:var(--f-body);font-size:10px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:6px 12px;border:1px solid var(--border);background:transparent;color:var(--ink-mid);cursor:pointer;border-radius:2px;}
+.btn-utility:hover{background:var(--parchment-d);}
+.sync-indicator{font-family:var(--f-body);font-size:10px;letter-spacing:1px;color:var(--ink-faint);}
+.sync-indicator.syncing{color:var(--sage-dark);}
+.sync-indicator.error{color:var(--terra);}
 
 /* NAV */
-.nav-tabs{background:var(--parchment);border-bottom:1px solid var(--border);display:flex;padding:0 28px;overflow-x:auto;}
-.nav-tab{font-family:var(--fb);font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;padding:14px 20px 12px;cursor:pointer;border:none;background:transparent;color:var(--ink-light);border-bottom:2px solid transparent;transition:all .15s;position:relative;top:1px;white-space:nowrap;}
+.nav-tabs{background:var(--parchment);border-bottom:1px solid var(--border);display:flex;padding:0 24px;overflow-x:auto;}
+.nav-tab{font-family:var(--f-body);font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;padding:13px 18px 11px;cursor:pointer;border:none;background:transparent;color:var(--ink-light);border-bottom:2px solid transparent;transition:all .15s;position:relative;top:1px;white-space:nowrap;}
 .nav-tab:hover{color:var(--ink);}
 .nav-tab.active{color:var(--ink);border-bottom:2px solid var(--ink);}
 
-/* PAGE */
-.page{display:none;padding:24px 28px;max-width:1200px;margin:0 auto;}
+/* PAGES */
+.page{display:none;padding:24px;max-width:1200px;margin:0 auto;}
 .page.active{display:block;}
 
 /* SECTION HEADER */
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border-soft);flex-wrap:wrap;gap:10px;}
-.section-title{font-family:var(--fd);font-size:26px;font-weight:300;font-style:italic;color:var(--ink);}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border-soft);gap:12px;flex-wrap:wrap;}
+.section-title{font-family:var(--f-display);font-size:26px;font-weight:300;font-style:italic;color:var(--ink);}
 .section-header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 
-/* STASH SECTION */
-.stash-section{margin-bottom:36px;}
-.stash-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;cursor:pointer;user-select:none;}
-.stash-section-title{font-family:var(--fd);font-size:20px;font-weight:400;font-style:italic;color:var(--ink);display:flex;align-items:center;gap:10px;}
-.stash-section-title::before{content:'';display:block;width:28px;height:1px;background:var(--border);}
-.stash-toggle{font-size:12px;color:var(--ink-light);transition:transform .2s;}
-.stash-toggle.collapsed{transform:rotate(-90deg);}
-.stash-section-body{transition:opacity .2s;}
-.stash-section-body.collapsed{display:none;}
-
-/* SEARCH + FILTER */
-.search-input{font-family:var(--fb);font-size:12px;font-weight:300;padding:7px 14px;border:1px solid var(--border);background:var(--parchment);color:var(--ink);width:180px;outline:none;border-radius:2px;}
+/* FILTER BAR */
+.filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+.search-input{font-family:var(--f-body);font-size:12px;font-weight:300;padding:7px 14px;border:1px solid var(--border);background:var(--parchment);color:var(--ink);width:200px;outline:none;border-radius:2px;}
 .search-input:focus{border-color:var(--ink-mid);}
 .search-input::placeholder{color:var(--ink-faint);}
-.filter-select{font-family:var(--fb);font-size:11px;font-weight:300;letter-spacing:.5px;padding:7px 10px;border:1px solid var(--border);background:var(--parchment);color:var(--ink-mid);outline:none;border-radius:2px;cursor:pointer;appearance:none;padding-right:24px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239a8068'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;}
+.filter-select{font-family:var(--f-body);font-size:11px;font-weight:300;padding:7px 12px;border:1px solid var(--border);background:var(--parchment);color:var(--ink-mid);outline:none;border-radius:2px;cursor:pointer;appearance:none;}
 
-/* ADD BUTTON */
-.btn-add{font-family:var(--fb);font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;padding:8px 18px;border:1px solid var(--ink);background:var(--ink);color:var(--cream);cursor:pointer;border-radius:2px;}
-.btn-add:hover{background:var(--ink-mid);border-color:var(--ink-mid);}
+/* BUTTONS */
+.btn-add{font-family:var(--f-body);font-size:10px;font-weight:400;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--cream);cursor:pointer;border-radius:2px;}
+.btn-add:hover{background:var(--ink-mid);}
+.btn-sm{font-family:var(--f-body);font-size:10px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border:1px solid var(--border);background:transparent;color:var(--ink-mid);cursor:pointer;border-radius:1px;}
+.btn-sm:hover{background:var(--parchment-d);color:var(--ink);}
+.btn-sm.danger:hover{background:var(--terra-light);color:var(--terra);border-color:var(--terra);}
+.btn-open{font-family:var(--f-body);font-size:10px;font-weight:400;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;border:1px solid var(--ink-mid);background:transparent;color:var(--ink-mid);cursor:pointer;border-radius:1px;white-space:nowrap;}
+.btn-open:hover{background:var(--ink);color:var(--cream);border-color:var(--ink);}
 
 /* CARDS GRID */
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
@@ -72,160 +81,162 @@ body{background:var(--cream);font-family:var(--fb);font-weight:300;color:var(--i
 /* PROJECT CARD */
 .card{background:var(--parchment);border:1px solid var(--border);border-radius:2px;overflow:hidden;transition:transform .15s,box-shadow .15s;box-shadow:2px 2px 0 var(--border-soft);}
 .card:hover{transform:translateY(-2px);box-shadow:4px 4px 0 var(--border);}
-.card-photos{position:relative;width:100%;height:180px;background:var(--parchment-d);border-bottom:1px solid var(--border);overflow:hidden;}
-.card-photo-main{width:100%;height:100%;object-fit:cover;display:block;}
-.card-photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-style:italic;font-size:13px;color:var(--ink-faint);}
-.card-photo-count{position:absolute;bottom:8px;right:8px;background:rgba(61,50,34,.6);color:white;font-family:var(--fb);font-size:10px;font-weight:400;letter-spacing:1px;padding:2px 8px;border-radius:1px;}
+.card-photos{position:relative;width:100%;height:170px;background:var(--parchment-d);border-bottom:1px solid var(--border);overflow:hidden;cursor:pointer;}
+.card-photos img{width:100%;height:100%;object-fit:cover;display:block;}
+.card-photos-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-style:italic;font-size:13px;color:var(--ink-faint);}
+.photo-count-badge{position:absolute;bottom:8px;right:8px;background:rgba(61,50,34,.6);color:var(--cream);font-family:var(--f-body);font-size:10px;letter-spacing:1px;padding:3px 8px;border-radius:10px;}
 .card-body{padding:14px 16px;}
-.card-title{font-family:var(--fd);font-size:19px;font-weight:400;color:var(--ink);margin-bottom:4px;line-height:1.2;}
-.card-meta{font-family:var(--fb);font-size:11px;font-weight:300;color:var(--ink-light);margin-bottom:8px;line-height:1.7;}
+.card-title{font-family:var(--f-display);font-size:19px;font-weight:400;color:var(--ink);margin-bottom:4px;line-height:1.2;}
+.card-meta{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);margin-bottom:8px;line-height:1.6;}
 .card-meta a{color:var(--sky);text-decoration:none;}
-.card-meta a:hover{text-decoration:underline;}
-.status-badge{display:inline-block;font-family:var(--fb);font-size:9px;font-weight:400;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border-radius:1px;margin-bottom:10px;}
+.card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.status-badge{display:inline-block;font-family:var(--f-body);font-size:9px;font-weight:400;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border-radius:1px;}
 .status-not-started{background:var(--sand-light);color:#6b4e2a;border:1px solid var(--sand);}
 .status-in-progress{background:var(--sage-light);color:var(--sage-dark);border:1px solid var(--sage);}
 .status-completed{background:var(--sky-light);color:#3a617a;border:1px solid var(--sky);}
 .status-on-hold{background:var(--terra-light);color:#7a3a34;border:1px solid var(--terra);}
 .progress-wrap{background:var(--parchment-d);height:3px;margin-bottom:4px;overflow:hidden;}
 .progress-fill{height:100%;background:var(--sage-dark);}
-.progress-label{font-family:var(--fb);font-size:10px;font-weight:300;letter-spacing:1px;color:var(--ink-light);text-align:right;margin-bottom:8px;}
-.yarn-chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;}
-.yarn-chip{width:14px;height:14px;border-radius:50%;border:1px solid rgba(61,50,34,.2);}
-.card-linked{font-family:var(--fb);font-size:10px;font-weight:300;color:var(--ink-light);letter-spacing:.3px;margin-bottom:4px;}
-.card-linked span{color:var(--ink-mid);}
-.card-footer{border-top:1px solid var(--border-soft);padding:8px 16px;display:flex;gap:6px;}
-.btn-sm{font-family:var(--fb);font-size:10px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border:1px solid var(--border);background:transparent;color:var(--ink-mid);cursor:pointer;border-radius:1px;}
-.btn-sm:hover{background:var(--parchment-d);color:var(--ink);}
-.btn-sm.danger:hover{background:var(--terra-light);color:var(--terra);border-color:var(--terra);}
-.btn-sm.primary{background:var(--ink);color:var(--cream);border-color:var(--ink);}
-.btn-sm.primary:hover{background:var(--ink-mid);}
+.progress-label{font-family:var(--f-body);font-size:10px;font-weight:300;letter-spacing:1px;color:var(--ink-light);text-align:right;margin-bottom:8px;}
+.chip-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;align-items:center;}
+.yarn-chip{width:14px;height:14px;border-radius:50%;border:1px solid rgba(61,50,34,.2);display:inline-block;}
+.linked-badge{font-family:var(--f-body);font-size:9px;font-weight:400;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:1px;border:1px solid var(--lav);background:var(--lav-light);color:#4a3a7a;}
+.card-footer{border-top:1px solid var(--border-soft);padding:9px 16px;display:flex;gap:6px;}
 
 /* YARN CARD */
-.yarn-card{background:var(--parchment);border:1px solid var(--border);border-radius:2px;overflow:hidden;box-shadow:2px 2px 0 var(--border-soft);transition:transform .15s;}
+.yarn-card{background:var(--parchment);border:1px solid var(--border);border-radius:2px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start;box-shadow:2px 2px 0 var(--border-soft);transition:transform .15s;}
 .yarn-card:hover{transform:translateY(-2px);}
-.yarn-card-top{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;}
 .yarn-swatch-lg{width:44px;height:44px;border-radius:50%;border:1px solid rgba(61,50,34,.2);flex-shrink:0;}
-.yarn-name{font-family:var(--fd);font-size:17px;font-weight:400;color:var(--ink);margin-bottom:2px;}
-.yarn-detail{font-family:var(--fb);font-size:11px;font-weight:300;color:var(--ink-light);line-height:1.7;}
-.weight-badge{display:inline-block;font-family:var(--fb);font-size:9px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border:1px solid var(--sand);background:var(--sand-light);color:#6b4e2a;border-radius:1px;margin-top:4px;}
-.yarn-card-foot{border-top:1px solid var(--border-soft);padding:8px 16px;display:flex;gap:6px;}
+.yarn-name{font-family:var(--f-display);font-size:17px;font-weight:400;color:var(--ink);margin-bottom:2px;}
+.yarn-detail{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);line-height:1.6;}
+.weight-badge{display:inline-block;font-family:var(--f-body);font-size:9px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border:1px solid var(--sand);background:var(--sand-light);color:#6b4e2a;border-radius:1px;margin-top:4px;}
 
 /* NEEDLE CARD */
-.needle-card{background:var(--parchment);border:1px solid var(--border);border-radius:2px;padding:14px 16px;box-shadow:2px 2px 0 var(--border-soft);transition:transform .15s;display:flex;gap:14px;align-items:flex-start;}
+.needle-card{background:var(--parchment);border:1px solid var(--border);border-radius:2px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start;box-shadow:2px 2px 0 var(--border-soft);transition:transform .15s;}
 .needle-card:hover{transform:translateY(-2px);}
-.needle-size-badge{width:44px;height:44px;border-radius:50%;background:var(--sand-light);border:1px solid var(--sand);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:15px;font-weight:400;color:var(--ink-mid);flex-shrink:0;}
-.needle-name{font-family:var(--fd);font-size:17px;font-weight:400;color:var(--ink);margin-bottom:2px;}
-.needle-detail{font-family:var(--fb);font-size:11px;font-weight:300;color:var(--ink-light);line-height:1.7;}
-.needle-avail{font-family:var(--fb);font-size:10px;font-weight:400;letter-spacing:.5px;margin-top:5px;}
-.needle-avail .avail{color:var(--sage-dark);}
-.needle-avail .inuse{color:var(--terra);}
-.type-badge{display:inline-block;font-family:var(--fb);font-size:9px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border:1px solid var(--sky);background:var(--sky-light);color:#3a617a;border-radius:1px;margin-top:4px;}
+.needle-icon{width:44px;height:44px;border-radius:50%;background:var(--sand-light);border:1px solid var(--sand);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.needle-size{font-family:var(--f-display);font-size:17px;font-weight:400;color:var(--ink);margin-bottom:2px;}
+.needle-detail{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);line-height:1.6;}
+.avail-badge{display:inline-block;font-family:var(--f-body);font-size:9px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:1px;margin-top:4px;}
+.avail-ok{border:1px solid var(--sage);background:var(--sage-light);color:var(--sage-dark);}
+.avail-busy{border:1px solid var(--terra);background:var(--terra-light);color:#7a3a34;}
 
-/* ACQUIRE LIST */
-.acquire-list{display:flex;flex-direction:column;gap:8px;}
-.acquire-item{background:var(--parchment);border:1px solid var(--border);border-radius:2px;padding:12px 16px;display:flex;gap:12px;align-items:center;box-shadow:2px 2px 0 var(--border-soft);transition:opacity .2s;}
-.acquire-item.done{opacity:.4;}
-.acquire-check{width:20px;height:20px;border:1.5px solid var(--border);border-radius:2px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--cream);}
-.acquire-check.checked{background:var(--sage-dark);border-color:var(--sage-dark);}
-.acquire-check.checked::after{content:'✓';color:white;font-size:12px;}
-.acquire-info{flex:1;}
-.acquire-name{font-family:var(--fd);font-size:16px;font-weight:400;color:var(--ink);}
-.acquire-meta{font-family:var(--fb);font-size:11px;font-weight:300;color:var(--ink-light);line-height:1.6;}
+/* ACQUIRE */
+.acquire-card{background:var(--parchment);border:1px solid var(--border);border-radius:2px;padding:12px 16px;display:flex;gap:12px;align-items:center;box-shadow:2px 2px 0 var(--border-soft);transition:all .15s;}
+.acquire-card:hover{transform:translateY(-1px);}
+.acquire-check{width:22px;height:22px;border:1.5px solid var(--border);border-radius:50%;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.acquire-check:hover{border-color:var(--sage-dark);background:var(--sage-light);}
+.acquire-name{font-family:var(--f-display);font-size:16px;font-weight:400;color:var(--ink);flex:1;}
+.acquire-meta{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);}
 .acquire-meta a{color:var(--sky);text-decoration:none;}
-.priority-badge{font-family:var(--fb);font-size:9px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:1px;}
-.priority-must{background:var(--terra-light);color:#7a3a34;border:1px solid var(--terra);}
-.priority-wanting{background:var(--sand-light);color:#6b4e2a;border:1px solid var(--sand);}
-.priority-nice{background:var(--sage-light);color:var(--sage-dark);border:1px solid var(--sage);}
+.priority-badge{font-family:var(--f-body);font-size:9px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:1px;}
+.priority-must{border:1px solid var(--terra);background:var(--terra-light);color:#7a3a34;}
+.priority-wanting{border:1px solid var(--sand);background:var(--sand-light);color:#6b4e2a;}
+.priority-nice{border:1px solid var(--border);background:var(--parchment-d);color:var(--ink-light);}
 
 /* PATTERN CARD */
 .pattern-card{background:var(--parchment);border:1px solid var(--border);border-radius:2px;overflow:hidden;box-shadow:2px 2px 0 var(--border-soft);transition:transform .15s;}
-.pattern-card:hover{transform:translateY(-2px);}
-.pattern-card-top{display:flex;gap:14px;align-items:center;padding:14px 16px;}
-.pattern-icon{width:44px;height:56px;background:var(--parchment-d);border:1px solid var(--border);border-radius:1px 6px 1px 1px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;position:relative;}
-.pattern-icon::after{content:'';position:absolute;top:-1px;right:-1px;border-style:solid;border-width:0 8px 8px 0;border-color:transparent var(--cream) transparent transparent;}
-.pattern-name{font-family:var(--fd);font-size:17px;font-weight:400;font-style:italic;flex:1;color:var(--ink);}
-.pattern-card-foot{border-top:1px solid var(--border-soft);padding:8px 16px;display:flex;gap:6px;}
+.pattern-card:hover{transform:translateY(-1px);}
+.pattern-card-inner{padding:14px 16px;display:flex;gap:14px;align-items:center;}
+.pattern-icon{width:44px;height:56px;background:var(--parchment-d);border:1px solid var(--border);border-radius:1px 8px 1px 1px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;position:relative;}
+.pattern-icon::after{content:'';position:absolute;top:-1px;right:-1px;border-style:solid;border-width:0 9px 9px 0;border-color:transparent var(--cream) transparent transparent;}
+.pattern-info{flex:1;}
+.pattern-name{font-family:var(--f-display);font-size:17px;font-weight:400;font-style:italic;color:var(--ink);margin-bottom:3px;}
+.pattern-meta{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);}
+
+/* STASH SECTIONS */
+.stash-section{margin-bottom:32px;}
+.stash-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border-soft);}
+.stash-section-title{font-family:var(--f-display);font-size:22px;font-weight:300;font-style:italic;color:var(--ink);}
+.list-stack{display:flex;flex-direction:column;gap:10px;}
 
 /* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(61,50,34,.4);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+.modal-overlay{position:fixed;inset:0;background:rgba(61,50,34,.4);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;}
 .modal-overlay.hidden{display:none;}
-.modal{background:var(--parchment);border:1px solid var(--border);border-radius:2px;box-shadow:6px 6px 0 var(--border);width:100%;max-width:560px;padding:28px;margin:auto;}
-.modal-title{font-family:var(--fd);font-size:24px;font-weight:300;font-style:italic;color:var(--ink);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border-soft);}
+.modal{background:var(--parchment);border:1px solid var(--border);border-radius:2px;box-shadow:6px 6px 0 var(--border);width:100%;max-width:580px;max-height:92vh;overflow-y:auto;padding:24px;}
+.modal-title{font-family:var(--f-display);font-size:24px;font-weight:300;font-style:italic;color:var(--ink);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border-soft);}
 .form-group{margin-bottom:14px;}
-.form-label{font-family:var(--fb);font-size:10px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--ink-mid);display:block;margin-bottom:5px;}
-.form-input,.form-select,.form-textarea{width:100%;font-family:var(--fb);font-size:13px;font-weight:300;padding:8px 12px;border:1px solid var(--border);background:var(--cream);color:var(--ink);outline:none;border-radius:1px;appearance:none;}
+.form-label{font-family:var(--f-body);font-size:10px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--ink-mid);display:block;margin-bottom:5px;}
+.form-input,.form-select,.form-textarea{width:100%;font-family:var(--f-body);font-size:13px;font-weight:300;padding:8px 12px;border:1px solid var(--border);background:var(--cream);color:var(--ink);outline:none;border-radius:1px;appearance:none;}
 .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--ink-mid);}
-.form-textarea{resize:vertical;min-height:72px;line-height:1.6;}
-.form-row{display:flex;gap:12px;}
+.form-textarea{resize:vertical;min-height:70px;line-height:1.6;}
+.form-row{display:flex;gap:10px;}
 .form-row>*{flex:1;}
 .form-range{width:100%;accent-color:var(--sage-dark);cursor:pointer;}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:14px;border-top:1px solid var(--border-soft);}
-.btn-cancel{font-family:var(--fb);font-size:11px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:8px 18px;border:1px solid var(--border);background:transparent;color:var(--ink-light);cursor:pointer;border-radius:1px;}
-.btn-save{font-family:var(--fb);font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;padding:8px 22px;border:1px solid var(--ink);background:var(--ink);color:var(--cream);cursor:pointer;border-radius:1px;}
+.btn-cancel{font-family:var(--f-body);font-size:11px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:8px 16px;border:1px solid var(--border);background:transparent;color:var(--ink-light);cursor:pointer;border-radius:1px;}
+.btn-save{font-family:var(--f-body);font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;padding:8px 20px;border:1px solid var(--ink);background:var(--ink);color:var(--cream);cursor:pointer;border-radius:1px;}
 .btn-save:hover{background:var(--ink-mid);}
 
-/* PHOTO JOURNAL */
-.photo-journal{display:flex;flex-direction:column;gap:8px;}
-.photo-journal-strip{display:flex;gap:6px;flex-wrap:wrap;}
-.photo-thumb-wrap{position:relative;width:70px;height:70px;}
-.photo-thumb{width:70px;height:70px;object-fit:cover;border:1px solid var(--border);border-radius:1px;display:block;}
-.photo-thumb-del{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--terra);border:none;border-radius:50%;color:white;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
-.photo-upload{border:1px dashed var(--border);padding:14px;text-align:center;cursor:pointer;font-family:var(--fb);font-size:11px;font-weight:300;color:var(--ink-light);background:var(--cream);border-radius:1px;}
-.photo-upload:hover{background:var(--parchment-d);}
+/* CHIP SELECTORS */
+.chip-selector{display:flex;flex-wrap:wrap;gap:6px;}
+.chip-sel-item{display:flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid var(--border);border-radius:1px;cursor:pointer;font-family:var(--f-body);font-size:12px;font-weight:300;color:var(--ink-mid);background:var(--cream);}
+.chip-sel-item.selected{border-color:var(--sage-dark);background:var(--sage-light);color:var(--sage-dark);}
+.chip-dot{width:11px;height:11px;border-radius:50%;border:1px solid rgba(61,50,34,.15);flex-shrink:0;}
 
-/* YARN/NEEDLE SELECTOR */
-.link-selector{display:flex;flex-wrap:wrap;gap:6px;max-height:120px;overflow-y:auto;padding:2px;}
-.link-chip{display:flex;align-items:center;gap:5px;padding:3px 9px;border:1px solid var(--border);border-radius:1px;cursor:pointer;font-family:var(--fb);font-size:11px;font-weight:300;color:var(--ink-mid);background:var(--cream);}
-.link-chip.selected{border-color:var(--sage-dark);background:var(--sage-light);color:var(--sage-dark);}
-.link-chip-dot{width:10px;height:10px;border-radius:50%;border:1px solid rgba(61,50,34,.15);flex-shrink:0;}
+/* PHOTO */
+.photo-upload{border:1px dashed var(--border);padding:14px;text-align:center;cursor:pointer;font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);background:var(--cream);border-radius:1px;}
+.photo-upload:hover{background:var(--parchment-d);}
+.photo-journal{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.photo-thumb-wrap{position:relative;display:inline-block;}
+.photo-thumb{width:72px;height:72px;object-fit:cover;border:1px solid var(--border);border-radius:2px;display:block;}
+.photo-thumb-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:var(--terra);border:none;border-radius:50%;color:white;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.photo-thumb-date{font-family:var(--f-body);font-size:9px;color:var(--ink-faint);text-align:center;margin-top:2px;width:72px;}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;background:rgba(20,14,8,.92);z-index:3000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+.lightbox.hidden{display:none;}
+.lightbox img{max-width:92vw;max-height:80vh;object-fit:contain;border:1px solid var(--border);}
+.lightbox-close{font-family:var(--f-body);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--sand);background:none;border:1px solid #5a4a2a;padding:6px 16px;cursor:pointer;border-radius:1px;}
+.lightbox-caption{font-family:var(--f-body);font-size:11px;color:var(--ink-faint);letter-spacing:1px;}
 
 /* EMPTY STATE */
-.empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;}
-.empty-title{font-family:var(--fd);font-size:20px;font-weight:300;font-style:italic;color:var(--ink-light);margin-bottom:6px;}
-.empty-sub{font-family:var(--fb);font-size:12px;font-weight:300;color:var(--ink-faint);}
+.empty-state{text-align:center;padding:60px 20px;}
+.empty-title{font-family:var(--f-display);font-size:20px;font-weight:300;font-style:italic;color:var(--ink-light);margin-bottom:6px;}
+.empty-sub{font-family:var(--f-body);font-size:12px;font-weight:300;color:var(--ink-faint);}
 
 /* TOAST */
-.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--cream);font-family:var(--fb);font-size:12px;font-weight:300;letter-spacing:1px;padding:10px 22px;border-radius:2px;z-index:9999;transition:transform .25s ease,opacity .25s ease;opacity:0;pointer-events:none;}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--cream);font-family:var(--f-body);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 22px;border-radius:2px;z-index:5000;transition:transform .25s ease,opacity .25s ease;opacity:0;pointer-events:none;}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 
 /* PDF VIEWER */
 #pdf-viewer{position:fixed;inset:0;background:#2a2016;z-index:2000;display:flex;flex-direction:column;touch-action:none;}
 #pdf-viewer.hidden{display:none;}
-.pdf-toolbar{background:#1e160e;border-bottom:1px solid #5a4a2a;padding:8px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
-.pdf-title{font-family:var(--fd);font-size:17px;font-weight:300;font-style:italic;color:#ede0cc;flex:1;min-width:80px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pdf-btn{font-family:var(--fb);font-size:10px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:6px 11px;border:1px solid #5a4a2a;background:transparent;color:#c8a882;cursor:pointer;border-radius:1px;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
-.pdf-btn:hover,.pdf-btn:active{background:#2a2016;}
+.pdf-toolbar{background:#1e160e;border-bottom:1px solid #5a4a2a;padding:8px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+.pdf-title{font-family:var(--f-display);font-size:17px;font-weight:300;font-style:italic;color:#ede0cc;flex:1;min-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pdf-btn{font-family:var(--f-body);font-size:10px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:5px 10px;border:1px solid #5a4a2a;background:transparent;color:#c8a882;cursor:pointer;border-radius:1px;white-space:nowrap;-webkit-user-select:none;user-select:none;}
+.pdf-btn:hover{background:#2a2016;}
 .pdf-btn.active{background:var(--terra);border-color:var(--terra);color:#fffdf7;}
-.pdf-page-info{font-family:var(--fb);font-size:11px;font-weight:300;letter-spacing:1px;color:#8a7060;white-space:nowrap;}
-.counter-widget{display:flex;align-items:center;gap:1px;border:1px solid #5a4a2a;border-radius:1px;padding:1px 6px;background:#1e160e;}
-.counter-label{font-family:var(--fb);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#8a7060;margin-right:3px;}
-.counter-val{font-family:var(--fd);font-size:22px;font-weight:300;color:var(--sand);min-width:28px;text-align:center;line-height:1;}
-.counter-btn{font-size:15px;background:none;border:none;cursor:pointer;color:#8a7060;width:20px;height:20px;display:flex;align-items:center;justify-content:center;padding:0;-webkit-tap-highlight-color:transparent;}
-.counter-btn:hover,.counter-btn:active{color:var(--sand);}
+.pdf-page-info{font-family:var(--f-body);font-size:11px;font-weight:300;letter-spacing:1px;color:#8a7060;white-space:nowrap;}
+.zoom-info{font-family:var(--f-body);font-size:10px;letter-spacing:1px;color:#6a5a40;white-space:nowrap;min-width:36px;text-align:center;}
+.counter-widget{display:flex;align-items:center;gap:2px;border:1px solid #5a4a2a;border-radius:1px;padding:2px 6px;background:#1e160e;}
+.counter-label{font-family:var(--f-body);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#8a7060;margin-right:3px;}
+.counter-val{font-family:var(--f-display);font-size:22px;font-weight:300;color:var(--sand);min-width:28px;text-align:center;line-height:1;}
+.counter-btn{font-size:15px;background:none;border:none;cursor:pointer;color:#8a7060;width:20px;height:20px;display:flex;align-items:center;justify-content:center;padding:0;-webkit-user-select:none;user-select:none;}
+.counter-btn:hover{color:var(--sand);}
 .pdf-body{flex:1;display:flex;overflow:hidden;}
-.pdf-canvas-area{flex:1;overflow:hidden;position:relative;background:#362a1a;display:flex;align-items:flex-start;justify-content:center;}
-.pdf-scroll-container{position:absolute;inset:0;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:20px;}
-.pdf-page-wrap{position:relative;display:inline-block;box-shadow:0 4px 24px rgba(0,0,0,.5);transform-origin:top center;flex-shrink:0;}
+.pdf-canvas-area{flex:1;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;background:#362a1a;position:relative;touch-action:none;}
+.pdf-canvas-scroll{overflow:auto;width:100%;height:100%;display:flex;align-items:flex-start;justify-content:center;padding:20px;}
+.pdf-page-wrap{position:relative;display:inline-block;box-shadow:0 4px 24px rgba(0,0,0,.5);flex-shrink:0;}
 #pdf-canvas{display:block;}
-#row-highlight{position:absolute;left:0;right:0;height:28px;background:rgba(200,168,130,.2);border-top:2px solid rgba(200,168,130,.65);border-bottom:2px solid rgba(200,168,130,.65);cursor:ns-resize;display:none;z-index:10;touch-action:none;}
+#row-highlight{position:absolute;left:0;right:0;height:26px;background:rgba(200,168,130,.22);border-top:1.5px solid rgba(200,168,130,.6);border-bottom:1.5px solid rgba(200,168,130,.6);cursor:ns-resize;display:none;z-index:10;touch-action:none;}
 #row-highlight.visible{display:block;}
-.hl-label{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--fb);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:rgba(200,168,130,.7);pointer-events:none;}
+.hl-label{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--f-body);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:rgba(200,168,130,.7);pointer-events:none;}
 .notes-panel{width:260px;background:#1e160e;border-left:1px solid #5a4a2a;display:flex;flex-direction:column;flex-shrink:0;transition:width .2s;}
 .notes-panel.collapsed{width:32px;}
-.notes-toggle{background:none;border:none;border-bottom:1px solid #3a2a18;color:#8a7060;cursor:pointer;font-size:13px;padding:9px;text-align:center;width:100%;-webkit-tap-highlight-color:transparent;}
+.notes-toggle{background:none;border:none;border-bottom:1px solid #3a2a18;color:#8a7060;cursor:pointer;font-size:13px;padding:9px;text-align:center;width:100%;}
 .notes-toggle:hover{color:var(--sand);}
 .notes-content{display:flex;flex-direction:column;flex:1;overflow:hidden;}
 .notes-panel.collapsed .notes-content{display:none;}
-.notes-head{font-family:var(--fb);font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:#8a7060;padding:9px 12px;border-bottom:1px solid #3a2a18;}
-.notes-list{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch;}
+.notes-head{font-family:var(--f-body);font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:#8a7060;padding:9px 12px;border-bottom:1px solid #3a2a18;}
+.notes-list{flex:1;overflow-y:auto;padding:6px;display:flex;flex-direction:column;gap:6px;}
 .note-card{background:#2a2016;border:1px solid #4a3a22;overflow:hidden;}
-.note-card-head{background:#362a1a;padding:4px 8px;font-family:var(--fb);font-size:10px;letter-spacing:1px;color:#c8a882;display:flex;justify-content:space-between;align-items:center;}
+.note-card-head{background:#362a1a;padding:4px 8px;font-family:var(--f-body);font-size:10px;letter-spacing:1px;color:#c8a882;display:flex;justify-content:space-between;align-items:center;}
 .btn-del-note{background:none;border:none;color:#6a5a40;cursor:pointer;font-size:13px;padding:0;line-height:1;}
 .btn-del-note:hover{color:var(--terra);}
-.note-ta{width:100%;background:transparent;border:none;outline:none;resize:none;font-family:var(--fb);font-size:12px;font-weight:300;color:#e0d0b8;padding:7px 9px;min-height:55px;line-height:1.6;}
-.btn-add-note{font-family:var(--fb);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin:7px;padding:6px 10px;border:1px dashed #4a3a22;background:transparent;color:#8a7060;cursor:pointer;width:calc(100% - 14px);}
+.note-ta{width:100%;background:transparent;border:none;outline:none;resize:none;font-family:var(--f-body);font-size:12px;font-weight:300;color:#e0d0b8;padding:7px 9px;min-height:55px;line-height:1.6;}
+.btn-add-note{font-family:var(--f-body);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin:6px;padding:6px 10px;border:1px dashed #4a3a22;background:transparent;color:#8a7060;cursor:pointer;width:calc(100% - 12px);}
 .btn-add-note:hover{color:var(--sand);border-color:#8a7060;}
-.list-stack{display:flex;flex-direction:column;gap:10px;}
 .hidden{display:none!important;}
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:var(--parchment-d);}
@@ -234,103 +245,89 @@ body{background:var(--cream);font-family:var(--fb);font-weight:300;color:var(--i
 </head>
 <body>
 
-<header class="app-header">
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <div class="loading-title">Knitting <em>Studio</em></div>
+  <div class="loading-spinner"></div>
+  <div class="loading-sub" id="loading-msg">Connecting…</div>
+</div>
+
+<header class="app-header hidden" id="app-header">
   <div class="app-title">Knitting <em>Studio</em></div>
   <div class="header-actions">
+    <span class="sync-indicator" id="sync-indicator">●  synced</span>
     <button class="btn-utility" onclick="exportBackup()">Export</button>
     <button class="btn-utility" onclick="document.getElementById('import-file').click()">Import</button>
     <input type="file" id="import-file" accept=".json" class="hidden" onchange="importBackup(event)">
   </div>
 </header>
 
-<nav class="nav-tabs">
+<nav class="nav-tabs hidden" id="app-nav">
   <button class="nav-tab active" onclick="switchTab('projects')">Projects</button>
   <button class="nav-tab" onclick="switchTab('stash')">The Stash</button>
   <button class="nav-tab" onclick="switchTab('patterns')">Patterns</button>
 </nav>
 
 <!-- PROJECTS -->
-<div id="page-projects" class="page active">
+<div id="page-projects" class="page active hidden">
   <div class="section-header">
     <div class="section-title">My Projects</div>
-    <div class="section-header-right">
-      <input class="search-input" type="text" placeholder="Search…" id="proj-search" oninput="renderProjects()">
-      <select class="filter-select" id="proj-filter-status" onchange="renderProjects()">
-        <option value="">All Statuses</option>
-        <option value="not-started">Not Started</option>
-        <option value="in-progress">In Progress</option>
-        <option value="completed">Completed</option>
-        <option value="on-hold">On Hold</option>
-      </select>
-      <select class="filter-select" id="proj-sort" onchange="renderProjects()">
-        <option value="newest">Newest First</option>
-        <option value="oldest">Oldest First</option>
-        <option value="name">Name A–Z</option>
-        <option value="progress">Progress</option>
-      </select>
-      <button class="btn-add" onclick="openProjectModal()">+ Add Project</button>
-    </div>
+    <button class="btn-add" onclick="openProjectModal()">+ Add Project</button>
+  </div>
+  <div class="filter-bar">
+    <input class="search-input" type="text" placeholder="Search projects…" id="proj-search" oninput="renderProjects()">
+    <select class="filter-select" id="proj-filter-status" onchange="renderProjects()">
+      <option value="">All Statuses</option>
+      <option value="not-started">Not Started</option>
+      <option value="in-progress">In Progress</option>
+      <option value="completed">Completed</option>
+      <option value="on-hold">On Hold</option>
+    </select>
+    <select class="filter-select" id="proj-sort" onchange="renderProjects()">
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+      <option value="name">Name A–Z</option>
+      <option value="progress">Progress</option>
+    </select>
   </div>
   <div class="cards-grid" id="projects-grid"></div>
 </div>
 
 <!-- THE STASH -->
-<div id="page-stash" class="page">
-  <div class="section-header">
-    <div class="section-title">The Stash</div>
-  </div>
-
-  <!-- YARN SECTION -->
+<div id="page-stash" class="page hidden">
   <div class="stash-section">
-    <div class="stash-section-header" onclick="toggleStashSection('yarn')">
+    <div class="stash-section-header">
       <div class="stash-section-title">Yarn</div>
       <div style="display:flex;gap:8px;align-items:center;">
-        <input class="search-input" type="text" placeholder="Search yarn…" id="yarn-search" oninput="renderYarn()" onclick="event.stopPropagation()" style="width:150px;">
-        <button class="btn-add" onclick="event.stopPropagation();openYarnModal()" style="padding:6px 14px;font-size:10px;">+ Add</button>
-        <span class="stash-toggle" id="yarn-toggle">▼</span>
+        <input class="search-input" type="text" placeholder="Search yarn…" id="yarn-search" oninput="renderYarn()" style="width:160px;">
+        <button class="btn-add" onclick="openYarnModal()">+ Add</button>
       </div>
     </div>
-    <div class="stash-section-body" id="yarn-body">
-      <div class="cards-grid" id="yarn-grid"></div>
-    </div>
+    <div class="cards-grid" id="yarn-grid"></div>
   </div>
-
-  <!-- NEEDLES SECTION -->
   <div class="stash-section">
-    <div class="stash-section-header" onclick="toggleStashSection('needles')">
+    <div class="stash-section-header">
       <div class="stash-section-title">Knitting Needles</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn-add" onclick="event.stopPropagation();openNeedleModal()" style="padding:6px 14px;font-size:10px;">+ Add</button>
-        <span class="stash-toggle" id="needles-toggle">▼</span>
-      </div>
+      <button class="btn-add" onclick="openNeedleModal()">+ Add</button>
     </div>
-    <div class="stash-section-body" id="needles-body">
-      <div class="cards-grid" id="needles-grid"></div>
-    </div>
+    <div class="cards-grid" id="needle-grid"></div>
   </div>
-
-  <!-- ACQUIRE SECTION -->
   <div class="stash-section">
-    <div class="stash-section-header" onclick="toggleStashSection('acquire')">
+    <div class="stash-section-header">
       <div class="stash-section-title">Items to Acquire</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn-add" onclick="event.stopPropagation();openAcquireModal()" style="padding:6px 14px;font-size:10px;">+ Add</button>
-        <span class="stash-toggle" id="acquire-toggle">▼</span>
-      </div>
+      <button class="btn-add" onclick="openAcquireModal()">+ Add</button>
     </div>
-    <div class="stash-section-body" id="acquire-body">
-      <div class="acquire-list" id="acquire-list"></div>
-    </div>
+    <div class="list-stack" id="acquire-list"></div>
   </div>
 </div>
 
 <!-- PATTERNS -->
-<div id="page-patterns" class="page">
+<div id="page-patterns" class="page hidden">
   <div class="section-header">
     <div class="section-title">Patterns</div>
     <button class="btn-add" onclick="openPatternModal()">+ Add Pattern</button>
   </div>
-  <div class="cards-grid" id="patterns-grid"></div>
+  <div class="cards-grid" id="patterns-list"></div>
 </div>
 
 <!-- PROJECT MODAL -->
@@ -343,25 +340,21 @@ body{background:var(--cream);font-family:var(--fb);font-weight:300;color:var(--i
       <div class="form-group"><label class="form-label">Needle Size</label><input class="form-input" id="p-needle" type="text" placeholder="US 7 / 4.5mm"></div>
     </div>
     <div class="form-group"><label class="form-label">Ravelry URL</label><input class="form-input" id="p-ravelry" type="url" placeholder="https://www.ravelry.com/patterns/…"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Target Yardage</label><input class="form-input" id="p-target-yards" type="number" placeholder="e.g. 800"></div>
-      <div class="form-group"><label class="form-label">Progress — <span id="p-prog-val">0</span>%</label><input class="form-range" id="p-prog" type="range" min="0" max="100" value="0" step="1" oninput="document.getElementById('p-prog-val').textContent=this.value"></div>
-    </div>
+    <div class="form-group"><label class="form-label">Linked Pattern</label><select class="form-select" id="p-pattern"><option value="">None</option></select></div>
+    <div class="form-group"><label class="form-label">Progress — <span id="p-prog-val">0</span>%</label><input class="form-range" id="p-prog" type="range" min="0" max="100" value="0" step="1" oninput="document.getElementById('p-prog-val').textContent=this.value"></div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Start Date</label><input class="form-input" id="p-start" type="date"></div>
       <div class="form-group"><label class="form-label">End Date</label><input class="form-input" id="p-end" type="date"></div>
     </div>
-    <div class="form-group"><label class="form-label">Linked Pattern</label><select class="form-select" id="p-pattern"><option value="">None</option></select></div>
-    <div class="form-group"><label class="form-label">Yarn Used</label><div class="link-selector" id="p-yarn-sel"></div></div>
-    <div class="form-group"><label class="form-label">Needles Used</label><div class="link-selector" id="p-needle-sel"></div></div>
+    <div class="form-group"><label class="form-label">Target Yardage</label><input class="form-input" id="p-target-yards" type="number" placeholder="e.g. 1200"></div>
+    <div class="form-group"><label class="form-label">Yarn Used</label><div class="chip-selector" id="p-yarn-sel"></div></div>
+    <div class="form-group"><label class="form-label">Needles Used</label><div class="chip-selector" id="p-needle-sel"></div></div>
     <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="p-notes" placeholder="Modifications, stitch counts, reminders…"></textarea></div>
     <div class="form-group">
       <label class="form-label">Progress Photos</label>
-      <div class="photo-journal">
-        <div class="photo-journal-strip" id="p-photos-strip"></div>
-        <div class="photo-upload" onclick="document.getElementById('p-photo-input').click()">+ Add photo</div>
-        <input type="file" id="p-photo-input" accept="image/*" class="hidden" onchange="handleProjectPhoto(event)">
-      </div>
+      <div class="photo-upload" onclick="document.getElementById('p-photo-input').click()">+ Add photo</div>
+      <input type="file" id="p-photo-input" accept="image/*" class="hidden" onchange="handleProjectPhoto(event)">
+      <div class="photo-journal" id="p-photo-journal"></div>
     </div>
     <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('proj-modal')">Cancel</button><button class="btn-save" onclick="saveProject()">Save Project</button></div>
   </div>
@@ -402,17 +395,16 @@ body{background:var(--cream);font-family:var(--fb);font-weight:300;color:var(--i
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="n-type"><option>Straight</option><option>Circular</option><option>DPN</option><option>Cable</option><option>Interchangeable</option></select></div>
-      <div class="form-group"><label class="form-label">Material</label><select class="form-select" id="n-material"><option>Metal</option><option>Wood</option><option>Bamboo</option><option>Plastic</option><option>Carbon Fiber</option></select></div>
+      <div class="form-group"><label class="form-label">Material</label><select class="form-select" id="n-material"><option>Metal</option><option>Wood</option><option>Bamboo</option><option>Plastic</option><option>Carbon Fibre</option></select></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Length (for circulars)</label><input class="form-input" id="n-length" type="text" placeholder="e.g. 32 inches"></div>
-      <div class="form-group"><label class="form-label">Brand</label><input class="form-input" id="n-brand" type="text" placeholder="e.g. ChiaoGoo"></div>
+      <div class="form-group"><label class="form-label">Length</label><input class="form-input" id="n-length" type="text" placeholder='e.g. 32"'></div>
+      <div class="form-group"><label class="form-label">Brand</label><input class="form-input" id="n-brand" type="text" placeholder="e.g. Addi"></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Quantity Owned</label><input class="form-input" id="n-qty" type="number" value="1" min="1"></div>
-      <div class="form-group"></div>
+      <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="n-notes" type="text" placeholder="Optional"></div>
     </div>
-    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="n-notes" placeholder="Any notes about these needles…"></textarea></div>
     <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('needle-modal')">Cancel</button><button class="btn-save" onclick="saveNeedle()">Save Needles</button></div>
   </div>
 </div>
@@ -421,12 +413,12 @@ body{background:var(--cream);font-family:var(--fb);font-weight:300;color:var(--i
 <div class="modal-overlay hidden" id="acquire-modal">
   <div class="modal">
     <div class="modal-title" id="acquire-modal-title">Add Item to Acquire</div>
-    <div class="form-group"><label class="form-label">Item Name</label><input class="form-input" id="a-name" type="text" placeholder="e.g. Malabrigo Rios in Peacock"></div>
+    <div class="form-group"><label class="form-label">Item Name</label><input class="form-input" id="aq-name" type="text" placeholder="e.g. Malabrigo Rios in Azul Profundo"></div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="a-type"><option>Yarn</option><option>Needles</option><option>Notions</option><option>Pattern</option><option>Other</option></select></div>
-      <div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="a-priority"><option value="must">Must Have</option><option value="wanting">Wanting</option><option value="nice">Nice to Have</option></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="aq-type"><option>Yarn</option><option>Needles</option><option>Notions</option><option>Pattern</option><option>Other</option></select></div>
+      <div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="aq-priority"><option value="must">Must Have</option><option value="wanting">Wanting</option><option value="nice" selected>Nice to Have</option></select></div>
     </div>
-    <div class="form-group"><label class="form-label">Link / Notes</label><input class="form-input" id="a-link" type="text" placeholder="URL or notes…"></div>
+    <div class="form-group"><label class="form-label">Link / Notes</label><input class="form-input" id="aq-notes" type="text" placeholder="URL or notes"></div>
     <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('acquire-modal')">Cancel</button><button class="btn-save" onclick="saveAcquire()">Save Item</button></div>
   </div>
 </div>
@@ -439,19 +431,17 @@ body{background:var(--cream);font-family:var(--fb);font-weight:300;color:var(--i
     <div class="form-group">
       <label class="form-label">PDF File</label>
       <div class="photo-upload" id="pdf-upload-label" onclick="document.getElementById('pat-pdf-input').click()">Click to choose a PDF file</div>
-      <input type="file" id="pat-pdf-input" accept="application/pdf" class="hidden" onchange="handlePdfUpload(event)">
-      <input type="hidden" id="pat-pdf-data">
+      <input type="file" id="pat-pdf-input" accept="application/pdf" class="hidden" onchange="handlePdfSelect(event)">
     </div>
     <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('pat-modal')">Cancel</button><button class="btn-save" onclick="savePattern()">Save Pattern</button></div>
   </div>
 </div>
 
-<!-- PHOTO VIEWER MODAL -->
-<div class="modal-overlay hidden" id="photo-modal" onclick="closeModal('photo-modal')">
-  <div style="max-width:90vw;max-height:90vh;display:flex;flex-direction:column;align-items:center;gap:10px;">
-    <img id="photo-modal-img" src="" style="max-width:100%;max-height:80vh;object-fit:contain;border:2px solid var(--border);display:block;">
-    <div id="photo-modal-caption" style="font-family:var(--fb);font-size:11px;color:var(--ink-faint);letter-spacing:1px;"></div>
-  </div>
+<!-- LIGHTBOX -->
+<div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="">
+  <div class="lightbox-caption" id="lightbox-caption"></div>
+  <button class="lightbox-close">Close</button>
 </div>
 
 <!-- PDF VIEWER -->
@@ -462,7 +452,9 @@ body{background:var(--cream);font-family:var(--fb);font-weight:300;color:var(--i
     <button class="pdf-btn" onclick="changePage(-1)">← Prev</button>
     <span class="pdf-page-info" id="pdf-page-info">1 / 1</span>
     <button class="pdf-btn" onclick="changePage(1)">Next →</button>
-    <button class="pdf-btn" id="hl-btn" onclick="toggleHighlight()">Row Highlight</button>
+    <button class="pdf-btn" id="hl-btn" onclick="toggleHighlight()">Highlight</button>
+    <button class="pdf-btn" onclick="resetZoom()">Fit</button>
+    <span class="zoom-info" id="zoom-info">100%</span>
     <div class="counter-widget">
       <span class="counter-label">Row</span>
       <button class="counter-btn" onclick="cDown()">−</button>
@@ -470,17 +462,14 @@ body{background:var(--cream);font-family:var(--fb);font-weight:300;color:var(--i
       <button class="counter-btn" onclick="cUp()">+</button>
       <button class="counter-btn" onclick="cReset()" style="font-size:11px" title="Reset">↺</button>
     </div>
-    <button class="pdf-btn" id="zoom-out-btn" onclick="adjustZoom(-0.2)">− Zoom</button>
-    <button class="pdf-btn" id="zoom-fit-btn" onclick="resetZoom()">Fit</button>
-    <button class="pdf-btn" id="zoom-in-btn" onclick="adjustZoom(0.2)">+ Zoom</button>
     <button class="pdf-btn" onclick="addNote()">+ Note</button>
   </div>
   <div class="pdf-body">
     <div class="pdf-canvas-area" id="pdf-canvas-area">
-      <div class="pdf-scroll-container" id="pdf-scroll-container">
+      <div class="pdf-canvas-scroll" id="pdf-canvas-scroll">
         <div class="pdf-page-wrap" id="pdf-page-wrap">
           <canvas id="pdf-canvas"></canvas>
-          <div id="row-highlight"><span class="hl-label">drag to move</span></div>
+          <div id="row-highlight"><span class="hl-label">drag ↕</span></div>
         </div>
       </div>
     </div>
@@ -498,348 +487,465 @@ body{background:var(--cream);font-family:var(--fb);font-weight:300;color:var(--i
 <div class="toast" id="toast"></div>
 
 <script>
+// ── SUPABASE CONFIG ──
+// Replace these two values with your own from Supabase Project Settings → API
+const SUPABASE_URL = 'https://grubpflhgscjdafspshx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdydWJwZmxoZ3NjamRhZnNwc2h4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MDYzMjcsImV4cCI6MjA4OTE4MjMyN30.Njh9He8VIJT9f8op93a3AznAxalRn27mplefhEgk67U';
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+// ── STATE ──
 let state={projects:[],yarn:[],needles:[],acquire:[],patterns:[]};
 let ePId=null,eYId=null,eNId=null,eAId=null;
 let pdfDoc=null,pdfPage=1,pdfTotal=1,curPat=null,cVal=1,hlOn=false,nCollapsed=false;
-let pdfZoom=1,pdfBaseScale=1;
-let projPhotos=[];
+let pdfScale=1,pdfBaseScale=1;
+let editPhotos=[];
+let selectedPdfFile=null;
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
 function esc(s){return s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''; }
-function load(){
-  try{
-    const s=localStorage.getItem('ks-v3');
-    if(s){
-      state=JSON.parse(s);
-      // Load PDF data back into patterns from separate keys
-      (state.patterns||[]).forEach(p=>{
-        if(!p.pdfData){
-          try{const d=localStorage.getItem('ks-pdf-'+p.id);if(d)p.pdfData=d;}catch(e){}
-        }
-      });
-    }
-  }catch(e){console.error('Load error',e);}
-}
-
-function save(){
-  // Save state WITHOUT pdfData inline (PDFs stored separately)
-  const slim={...state,patterns:(state.patterns||[]).map(p=>{
-    const {pdfData,...rest}=p;return rest;
-  })};
-  try{
-    localStorage.setItem('ks-v3',JSON.stringify(slim));
-    showToast('Saved');
-  }catch(e){
-    showToast('Storage full — please export a backup and delete unused patterns');
-    console.error('Save error',e);
-  }
-}
-
-function savePdf(id,data){
-  try{
-    localStorage.setItem('ks-pdf-'+id,data);
-    return true;
-  }catch(e){
-    alert('Could not save PDF — storage is full.\n\nTips:\n• Export a backup first\n• Delete patterns you no longer need\n• Try a smaller/compressed PDF (under 3MB)');
-    return false;
-  }
-}
-
-function deletePdf(id){
-  try{localStorage.removeItem('ks-pdf-'+id);}catch(e){}
-}
-
-function getStorageUsedMB(){
-  let total=0;
-  for(let k in localStorage){
-    if(localStorage.hasOwnProperty(k)){
-      try{total+=((localStorage.getItem(k)||'').length*2);}catch(e){}
-    }
-  }
-  return (total/1024/1024).toFixed(1);
-}
 function closeModal(id){document.getElementById(id).classList.add('hidden');}
 
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),1800);
+function showToast(msg,dur=1800){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+function setSyncStatus(status,msg){
+  const el=document.getElementById('sync-indicator');
+  el.textContent='● '+msg;
+  el.className='sync-indicator'+(status?' '+status:'');
+}
+
+// ── INIT ──
+async function init(){
+  document.getElementById('loading-msg').textContent='Loading your data…';
+  try{
+    await loadAll();
+    document.getElementById('loading-screen').classList.add('hidden');
+    document.getElementById('app-header').classList.remove('hidden');
+    document.getElementById('app-nav').classList.remove('hidden');
+    document.getElementById('page-projects').classList.remove('hidden');
+    renderProjects();
+    setSyncStatus('','synced');
+  }catch(e){
+    document.getElementById('loading-msg').textContent='Could not connect to Supabase. Check your credentials.';
+    console.error(e);
+  }
+}
+
+async function loadAll(){
+  const [proj,yarn,needles,acquire,patterns]=await Promise.all([
+    sb.from('projects').select('*').order('created_at',{ascending:false}),
+    sb.from('yarn').select('*').order('created_at',{ascending:false}),
+    sb.from('needles').select('*').order('created_at',{ascending:false}),
+    sb.from('acquire').select('*').order('created_at',{ascending:false}),
+    sb.from('patterns').select('*').order('created_at',{ascending:false}),
+  ]);
+  state.projects=(proj.data||[]).map(dbToProject);
+  state.yarn=(yarn.data||[]).map(dbToYarn);
+  state.needles=needles.data||[];
+  state.acquire=acquire.data||[];
+  state.patterns=(patterns.data||[]).map(dbToPattern);
+}
+
+// DB row converters
+function dbToProject(r){
+  return {id:r.id,name:r.name,status:r.status,needle:r.needle,ravelry:r.ravelry,patternId:r.pattern_id,progress:r.progress,startDate:r.start_date,endDate:r.end_date,notes:r.notes,targetYards:r.target_yards,yarnIds:r.yarn_ids||[],needleIds:r.needle_ids||[],photos:r.photos||[]};
+}
+function dbToYarn(r){
+  return {id:r.id,name:r.name,brand:r.brand,colourName:r.colour_name,colour:r.colour,weight:r.weight,fibre:r.fibre,yardage:r.yardage,skeins:r.skeins,notes:r.notes};
+}
+function dbToPattern(r){
+  return {id:r.id,name:r.name,notes:r.notes||[],highlightPos:r.highlight_pos||{},counter:r.counter||1,pdfUrl:r.pdf_url||null};
 }
 
 function switchTab(t){
   document.querySelectorAll('.nav-tab').forEach((el,i)=>el.classList.toggle('active',['projects','stash','patterns'][i]===t));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+(t==='stash'?'stash':t)).classList.add('active');
+  const pageId='page-'+(t==='stash'?'stash':t);
+  document.getElementById(pageId).classList.add('active');
   if(t==='projects')renderProjects();
   if(t==='stash'){renderYarn();renderNeedles();renderAcquire();}
   if(t==='patterns')renderPatterns();
 }
 
-function toggleStashSection(s){
-  const body=document.getElementById(s+'-body');
-  const tog=document.getElementById(s+'-toggle');
-  const collapsed=body.classList.toggle('collapsed');
-  tog.classList.toggle('collapsed',collapsed);
-}
-
 const SL={'not-started':'Not Started','in-progress':'In Progress','completed':'Completed','on-hold':'On Hold'};
 
-/* ── PROJECTS ── */
+// ── PROJECTS ──
 function renderProjects(){
   const q=(document.getElementById('proj-search').value||'').toLowerCase();
   const fs=document.getElementById('proj-filter-status').value;
   const sort=document.getElementById('proj-sort').value;
   const grid=document.getElementById('projects-grid');
-  let list=state.projects.filter(p=>
-    (p.name.toLowerCase().includes(q)||(p.ravelry||'').toLowerCase().includes(q))&&
-    (!fs||p.status===fs)
-  );
+  let list=state.projects.filter(p=>{
+    const mq=p.name.toLowerCase().includes(q)||(p.ravelry||'').toLowerCase().includes(q);
+    const ms=!fs||p.status===fs;
+    return mq&&ms;
+  });
   if(sort==='oldest')list=[...list].reverse();
   else if(sort==='name')list=[...list].sort((a,b)=>a.name.localeCompare(b.name));
   else if(sort==='progress')list=[...list].sort((a,b)=>(b.progress||0)-(a.progress||0));
-  if(!list.length){grid.innerHTML='<div class="empty-state"><div class="empty-title">No projects yet</div><div class="empty-sub">Cast on your first project above</div></div>';return;}
+  if(!list.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">No projects yet</div><div class="empty-sub">Cast on your first project above</div></div>';return;}
   grid.innerHTML=list.map(p=>{
     const yarns=(p.yarnIds||[]).map(id=>state.yarn.find(y=>y.id===id)).filter(Boolean);
     const chips=yarns.map(y=>`<span class="yarn-chip" style="background:${y.colour}" title="${esc(y.name)}"></span>`).join('');
-    const photos=p.photos||[];
-    const photoEl=photos.length
-      ?`<div class="card-photos"><img class="card-photo-main" src="${photos[0].data}" alt="" onclick="openPhoto('${p.id}',0)">${photos.length>1?`<div class="card-photo-count">+${photos.length} photos</div>`:''}</div>`
-      :'<div class="card-photos"><div class="card-photo-placeholder">No photos yet</div></div>';
-    const rav=p.ravelry?`<a href="${esc(p.ravelry)}" target="_blank" rel="noopener">Ravelry ↗</a> · `:'';
-    const needle=p.needle?esc(p.needle)+' · ':'';
-    // yardage check
-    const totalYards=(p.yarnIds||[]).reduce((sum,id)=>{const y=state.yarn.find(y=>y.id===id);return sum+(y?(y.yardage||0)*(y.skeins||1):0);},0);
-    const targetYards=p.targetYards||0;
-    let yardsLine='';
-    if(totalYards>0&&targetYards>0){
-      const ok=totalYards>=targetYards;
-      yardsLine=`<div style="font-size:10px;font-family:var(--fb);font-weight:300;margin-bottom:6px;color:${ok?'var(--sage-dark)':'var(--terra)'};">${totalYards} yds available · ${targetYards} yds needed ${ok?'✓':'⚠ short by '+(targetYards-totalYards)+' yds'}</div>`;
-    }
     const pat=p.patternId?state.patterns.find(x=>x.id===p.patternId):null;
-    const patLine=pat?`<div class="card-linked">Pattern: <span>${esc(pat.name)}</span></div>`:'';
-    return `<div class="card">${photoEl}<div class="card-body"><div class="card-title">${esc(p.name)}</div><div class="card-meta">${rav}${needle}${p.startDate?p.startDate:''}</div><span class="status-badge status-${p.status}">${SL[p.status]}</span><div class="progress-wrap"><div class="progress-fill" style="width:${p.progress||0}%"></div></div><div class="progress-label">${p.progress||0}%</div>${yardsLine}${chips?'<div class="yarn-chips">'+chips+'</div>':''}${patLine}</div><div class="card-footer"><button class="btn-sm" onclick="openProjectModal('${p.id}')">Edit</button>${pat?`<button class="btn-sm primary" onclick="openPdf('${pat.id}')">Open Pattern</button>`:''}<button class="btn-sm danger" onclick="delProject('${p.id}')">Delete</button></div></div>`;
+    const photos=p.photos||[];
+    const coverPhoto=photos.length?photos[photos.length-1].url:null;
+    const photoEl=coverPhoto?`<img src="${esc(coverPhoto)}" alt="">`:'<div class="card-photos-placeholder">No photo yet</div>';
+    const photoBadge=photos.length>1?`<div class="photo-count-badge">${photos.length} photos</div>`:'';
+    const rav=p.ravelry?`<a href="${esc(p.ravelry)}" target="_blank" rel="noopener">Ravelry ↗</a> · `:'';
+    const totalYards=yarns.reduce((s,y)=>(s+(y.yardage||0)*(y.skeins||1)),0);
+    const yardWarn=p.targetYards&&totalYards&&totalYards<p.targetYards?`<div style="color:var(--terra);font-size:10px;margin-top:3px">⚠ ${totalYards} / ${p.targetYards} yds</div>`:'';
+    return `<div class="card">
+      <div class="card-photos" onclick="openPhotoViewer('${p.id}')">${photoEl}${photoBadge}</div>
+      <div class="card-body">
+        <div class="card-title">${esc(p.name)}</div>
+        <div class="card-meta">${rav}${p.needle?esc(p.needle):''}</div>
+        <div class="card-tags">
+          <span class="status-badge status-${p.status}">${SL[p.status]}</span>
+          ${pat?`<span class="linked-badge">📄 ${esc(pat.name)}</span>`:''}
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:${p.progress||0}%"></div></div>
+        <div class="progress-label">${p.progress||0}%</div>
+        ${chips?`<div class="chip-row">${chips}</div>`:''}
+        ${yardWarn}
+      </div>
+      <div class="card-footer">
+        <button class="btn-sm" onclick="openProjectModal('${p.id}')">Edit</button>
+        <button class="btn-sm" onclick="openPhotoViewer('${p.id}')">Photos</button>
+        ${pat?`<button class="btn-sm" onclick="openPdf('${pat.id}')">Pattern</button>`:''}
+        <button class="btn-sm danger" onclick="delProject('${p.id}')">Delete</button>
+      </div>
+    </div>`;
   }).join('');
 }
 
 function openProjectModal(id){
-  ePId=id||null;projPhotos=[];
+  ePId=id||null;
   const p=id?state.projects.find(x=>x.id===id):null;
   document.getElementById('proj-modal-title').textContent=p?'Edit Project':'New Project';
   document.getElementById('p-name').value=p?p.name:'';
   document.getElementById('p-status').value=p?p.status:'not-started';
   document.getElementById('p-needle').value=p?(p.needle||''):'';
   document.getElementById('p-ravelry').value=p?(p.ravelry||''):'';
-  document.getElementById('p-target-yards').value=p?(p.targetYards||''):'';
   document.getElementById('p-prog').value=p?(p.progress||0):0;
   document.getElementById('p-prog-val').textContent=p?(p.progress||0):0;
   document.getElementById('p-start').value=p?(p.startDate||''):'';
   document.getElementById('p-end').value=p?(p.endDate||''):'';
   document.getElementById('p-notes').value=p?(p.notes||''):'';
-  projPhotos=p?(p.photos||[]).map(ph=>({...ph})):[];
-  renderProjectPhotoStrip();
-
-  // pattern dropdown
-  const ps=document.getElementById('p-pattern');
-  ps.innerHTML='<option value="">None</option>'+state.patterns.map(pt=>`<option value="${pt.id}"${p&&p.patternId===pt.id?' selected':''}>${esc(pt.name)}</option>`).join('');
-
-  // yarn selector
-  const ySel=document.getElementById('p-yarn-sel');
-  const selY=p?(p.yarnIds||[]):[];
-  ySel.innerHTML=state.yarn.length?state.yarn.map(y=>`<div class="link-chip${selY.includes(y.id)?' selected':''}" data-id="${y.id}" onclick="this.classList.toggle('selected')"><span class="link-chip-dot" style="background:${y.colour}"></span>${esc(y.name)}</div>`).join(''):'<span style="font-size:11px;color:var(--ink-faint)">No yarn in stash</span>';
-
-  // needle selector
-  const nSel=document.getElementById('p-needle-sel');
-  const selN=p?(p.needleIds||[]):[];
-  nSel.innerHTML=state.needles.length?state.needles.map(n=>`<div class="link-chip${selN.includes(n.id)?' selected':''}" data-id="${n.id}" onclick="this.classList.toggle('selected')">${esc(n.us||n.mm||'?')} ${esc(n.type)}</div>`).join(''):'<span style="font-size:11px;color:var(--ink-faint)">No needles in stash</span>';
-
+  document.getElementById('p-target-yards').value=p?(p.targetYards||''):'';
+  editPhotos=p?(p.photos||[]).map(ph=>({...ph})):[];
+  renderEditPhotos();
+  const patSel=document.getElementById('p-pattern');
+  patSel.innerHTML='<option value="">None</option>'+state.patterns.map(pt=>`<option value="${pt.id}"${p&&p.patternId===pt.id?' selected':''}>${esc(pt.name)}</option>`).join('');
+  const selected=p?(p.yarnIds||[]):[];
+  const nselected=p?(p.needleIds||[]):[];
+  document.getElementById('p-yarn-sel').innerHTML=state.yarn.length?state.yarn.map(y=>`<div class="chip-sel-item${selected.includes(y.id)?' selected':''}" data-id="${y.id}" onclick="this.classList.toggle('selected')"><span class="chip-dot" style="background:${y.colour}"></span>${esc(y.name)}</div>`).join(''):'<span style="font-size:12px;color:var(--ink-faint)">No yarn in stash</span>';
+  document.getElementById('p-needle-sel').innerHTML=state.needles.length?state.needles.map(n=>`<div class="chip-sel-item${nselected.includes(n.id)?' selected':''}" data-id="${n.id}" onclick="this.classList.toggle('selected')">${esc(n.us||n.mm||'?')} ${esc(n.type)}</div>`).join(''):'<span style="font-size:12px;color:var(--ink-faint)">No needles in stash</span>';
   document.getElementById('proj-modal').classList.remove('hidden');
 }
 
-function renderProjectPhotoStrip(){
-  const strip=document.getElementById('p-photos-strip');
-  strip.innerHTML=projPhotos.map((ph,i)=>`<div class="photo-thumb-wrap"><img class="photo-thumb" src="${ph.data}" alt=""><button class="photo-thumb-del" onclick="removeProjectPhoto(${i})">×</button></div>`).join('');
+function renderEditPhotos(){
+  const j=document.getElementById('p-photo-journal');
+  j.innerHTML=editPhotos.map((ph,i)=>`
+    <div class="photo-thumb-wrap">
+      <img class="photo-thumb" src="${ph.url}" onclick="showLightbox('${ph.url}','${ph.date||''}')">
+      <button class="photo-thumb-del" onclick="removeEditPhoto(${i})">×</button>
+      <div class="photo-thumb-date">${ph.date||''}</div>
+    </div>`).join('');
+}
+function removeEditPhoto(i){
+  // Mark for deletion on save
+  if(editPhotos[i].path)editPhotos[i]._delete=true;
+  else editPhotos.splice(i,1);
+  renderEditPhotos();
 }
 
-function removeProjectPhoto(i){projPhotos.splice(i,1);renderProjectPhotoStrip();}
-
-function handleProjectPhoto(e){
+async function handleProjectPhoto(e){
   const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    const img=new Image();
-    img.onload=()=>{
-      const c=document.createElement('canvas');const mx=900;let w=img.width,h=img.height;
-      if(w>mx){h=h*mx/w;w=mx;}if(h>mx){w=w*mx/h;h=mx;}
-      c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
-      projPhotos.push({data:c.toDataURL('image/jpeg',.82),date:new Date().toLocaleDateString()});
-      renderProjectPhotoStrip();
-    };img.src=ev.target.result;
-  };r.readAsDataURL(f);
+  setSyncStatus('syncing','uploading…');
+  const path=`project-photos/${uid()}-${f.name.replace(/\s/g,'_')}`;
+  const{error}=await sb.storage.from('photos').upload(path,f,{contentType:f.type});
+  if(error){showToast('Photo upload failed');setSyncStatus('error','upload error');return;}
+  const{data}=sb.storage.from('photos').getPublicUrl(path);
+  const date=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  editPhotos.push({url:data.publicUrl,path,date});
+  renderEditPhotos();
+  setSyncStatus('','synced');
   e.target.value='';
 }
 
-function saveProject(){
+async function saveProject(){
   const name=document.getElementById('p-name').value.trim();if(!name){alert('Please enter a project name');return;}
-  const yarnIds=[...document.querySelectorAll('#p-yarn-sel .link-chip.selected')].map(el=>el.dataset.id);
-  const needleIds=[...document.querySelectorAll('#p-needle-sel .link-chip.selected')].map(el=>el.dataset.id);
-  const proj={id:ePId||uid(),name,status:document.getElementById('p-status').value,needle:document.getElementById('p-needle').value.trim(),ravelry:document.getElementById('p-ravelry').value.trim(),targetYards:parseInt(document.getElementById('p-target-yards').value)||0,progress:parseInt(document.getElementById('p-prog').value),startDate:document.getElementById('p-start').value,endDate:document.getElementById('p-end').value,notes:document.getElementById('p-notes').value.trim(),patternId:document.getElementById('p-pattern').value||null,yarnIds,needleIds,photos:projPhotos};
-  if(ePId){const i=state.projects.findIndex(p=>p.id===ePId);state.projects[i]=proj;}else state.projects.unshift(proj);
-  save();closeModal('proj-modal');renderProjects();
+  const yarnIds=[...document.querySelectorAll('#p-yarn-sel .chip-sel-item.selected')].map(el=>el.dataset.id);
+  const needleIds=[...document.querySelectorAll('#p-needle-sel .chip-sel-item.selected')].map(el=>el.dataset.id);
+  // Handle photo deletions
+  for(const ph of editPhotos.filter(p=>p._delete)){
+    await sb.storage.from('photos').remove([ph.path]);
+  }
+  const cleanPhotos=editPhotos.filter(p=>!p._delete);
+  const row={id:ePId||uid(),name,status:document.getElementById('p-status').value,needle:document.getElementById('p-needle').value.trim()||null,ravelry:document.getElementById('p-ravelry').value.trim()||null,pattern_id:document.getElementById('p-pattern').value||null,progress:parseInt(document.getElementById('p-prog').value),start_date:document.getElementById('p-start').value||null,end_date:document.getElementById('p-end').value||null,notes:document.getElementById('p-notes').value.trim()||null,target_yards:parseInt(document.getElementById('p-target-yards').value)||null,yarn_ids:yarnIds,needle_ids:needleIds,photos:cleanPhotos};
+  setSyncStatus('syncing','saving…');
+  const{error}=await sb.from('projects').upsert(row);
+  if(error){showToast('Save failed: '+error.message);setSyncStatus('error','save error');return;}
+  if(ePId){const i=state.projects.findIndex(p=>p.id===ePId);state.projects[i]=dbToProject(row);}
+  else state.projects.unshift(dbToProject(row));
+  setSyncStatus('','synced');
+  showToast('Saved');
+  closeModal('proj-modal');renderProjects();
 }
 
-function delProject(id){if(!confirm('Delete this project?'))return;state.projects=state.projects.filter(p=>p.id!==id);save();renderProjects();}
-
-function openPhoto(projId,idx){
-  const p=state.projects.find(x=>x.id===projId);if(!p||!p.photos)return;
-  document.getElementById('photo-modal-img').src=p.photos[idx].data;
-  document.getElementById('photo-modal-caption').textContent=p.photos[idx].date||'';
-  document.getElementById('photo-modal').classList.remove('hidden');
+async function delProject(id){
+  if(!confirm('Delete this project?'))return;
+  setSyncStatus('syncing','deleting…');
+  const p=state.projects.find(x=>x.id===id);
+  if(p&&p.photos){for(const ph of p.photos){if(ph.path)await sb.storage.from('photos').remove([ph.path]);}}
+  await sb.from('projects').delete().eq('id',id);
+  state.projects=state.projects.filter(p=>p.id!==id);
+  setSyncStatus('','synced');
+  renderProjects();
 }
 
-/* ── YARN ── */
+// ── PHOTO VIEWER ──
+function openPhotoViewer(projId){
+  const p=state.projects.find(x=>x.id===projId);
+  if(!p||(p.photos||[]).length===0){openProjectModal(projId);return;}
+  const photos=p.photos;
+  showLightbox(photos[photos.length-1].url,`${esc(p.name)} · ${photos[photos.length-1].date||''} · ${photos.length} photo${photos.length>1?'s':''}`);
+}
+function showLightbox(src,caption){
+  document.getElementById('lightbox-img').src=src;
+  document.getElementById('lightbox-caption').textContent=caption||'';
+  document.getElementById('lightbox').classList.remove('hidden');
+}
+function closeLightbox(){document.getElementById('lightbox').classList.add('hidden');}
+
+// ── YARN ──
 function renderYarn(){
   const q=(document.getElementById('yarn-search').value||'').toLowerCase();
   const grid=document.getElementById('yarn-grid');
   const list=state.yarn.filter(y=>y.name.toLowerCase().includes(q)||(y.brand||'').toLowerCase().includes(q)||(y.colourName||'').toLowerCase().includes(q));
-  if(!list.length){grid.innerHTML='<div class="empty-state"><div class="empty-title">No yarn yet</div><div class="empty-sub">Add your first yarn above</div></div>';return;}
+  if(!list.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">No yarn yet</div><div class="empty-sub">Add your first skein above</div></div>';return;}
   grid.innerHTML=list.map(y=>{
     const total=(y.yardage||0)*(y.skeins||1);
-    return `<div class="yarn-card"><div class="yarn-card-top"><div class="yarn-swatch-lg" style="background:${y.colour}"></div><div style="flex:1"><div class="yarn-name">${esc(y.name)}</div><div class="yarn-detail">${y.brand?esc(y.brand)+' · ':''}${y.colourName?esc(y.colourName):''}</div><div class="yarn-detail">${y.fibre?esc(y.fibre)+' · ':''}${total?total+' yds':''} ${y.skeins>1?'('+y.skeins+' skeins)':''}</div>${y.weight?`<span class="weight-badge">${y.weight}</span>`:''}</div></div><div class="yarn-card-foot"><button class="btn-sm" onclick="openYarnModal('${y.id}')">Edit</button><button class="btn-sm danger" onclick="delYarn('${y.id}')">Delete</button></div></div>`;
+    return `<div class="yarn-card"><div class="yarn-swatch-lg" style="background:${y.colour}"></div><div style="flex:1"><div class="yarn-name">${esc(y.name)}</div><div class="yarn-detail">${y.brand?esc(y.brand)+' · ':''}${y.colourName?esc(y.colourName):''}</div><div class="yarn-detail">${y.fibre?esc(y.fibre)+' · ':''}${total?total+' yds total':''}${y.skeins>1?' ('+y.skeins+' skeins)':''}</div>${y.weight?`<span class="weight-badge">${y.weight}</span>`:''}<div style="margin-top:8px;display:flex;gap:6px"><button class="btn-sm" onclick="openYarnModal('${y.id}')">Edit</button><button class="btn-sm danger" onclick="delYarn('${y.id}')">Delete</button></div></div></div>`;
   }).join('');
 }
 
 function openYarnModal(id){
   eYId=id||null;const y=id?state.yarn.find(x=>x.id===id):null;
   document.getElementById('yarn-modal-title').textContent=y?'Edit Yarn':'Add Yarn';
-  document.getElementById('y-name').value=y?y.name:'';document.getElementById('y-brand').value=y?(y.brand||''):'';
-  document.getElementById('y-colname').value=y?(y.colourName||''):'';document.getElementById('y-colour').value=y?y.colour:'#8fac78';
-  document.getElementById('y-weight').value=y?y.weight:'Worsted';document.getElementById('y-fibre').value=y?(y.fibre||''):'';
-  document.getElementById('y-yards').value=y?(y.yardage||''):'';document.getElementById('y-skeins').value=y?(y.skeins||1):1;
+  document.getElementById('y-name').value=y?y.name:'';
+  document.getElementById('y-brand').value=y?(y.brand||''):'';
+  document.getElementById('y-colname').value=y?(y.colourName||''):'';
+  document.getElementById('y-colour').value=y?y.colour:'#8fac78';
+  document.getElementById('y-weight').value=y?y.weight:'Worsted';
+  document.getElementById('y-fibre').value=y?(y.fibre||''):'';
+  document.getElementById('y-yards').value=y?(y.yardage||''):'';
+  document.getElementById('y-skeins').value=y?(y.skeins||1):1;
   document.getElementById('y-notes').value=y?(y.notes||''):'';
   document.getElementById('yarn-modal').classList.remove('hidden');
 }
-function saveYarn(){
-  const name=document.getElementById('y-name').value.trim();if(!name){alert('Please enter a yarn name');return;}
-  const yarn={id:eYId||uid(),name,brand:document.getElementById('y-brand').value.trim(),colourName:document.getElementById('y-colname').value.trim(),colour:document.getElementById('y-colour').value,weight:document.getElementById('y-weight').value,fibre:document.getElementById('y-fibre').value.trim(),yardage:parseInt(document.getElementById('y-yards').value)||0,skeins:parseInt(document.getElementById('y-skeins').value)||1,notes:document.getElementById('y-notes').value.trim()};
-  if(eYId){const i=state.yarn.findIndex(y=>y.id===eYId);state.yarn[i]=yarn;}else state.yarn.unshift(yarn);
-  save();closeModal('yarn-modal');renderYarn();
-}
-function delYarn(id){if(!confirm('Remove this yarn?'))return;state.yarn=state.yarn.filter(y=>y.id!==id);save();renderYarn();}
 
-/* ── NEEDLES ── */
-function getNeedleAvailability(n){
-  const active=state.projects.filter(p=>p.status==='in-progress'&&(p.needleIds||[]).includes(n.id));
-  return{owned:n.qty||1,inUse:active.length,available:Math.max(0,(n.qty||1)-active.length),projects:active.map(p=>p.name)};
+async function saveYarn(){
+  const name=document.getElementById('y-name').value.trim();if(!name){alert('Please enter a yarn name');return;}
+  const row={id:eYId||uid(),name,brand:document.getElementById('y-brand').value.trim()||null,colour_name:document.getElementById('y-colname').value.trim()||null,colour:document.getElementById('y-colour').value,weight:document.getElementById('y-weight').value,fibre:document.getElementById('y-fibre').value.trim()||null,yardage:parseInt(document.getElementById('y-yards').value)||0,skeins:parseInt(document.getElementById('y-skeins').value)||1,notes:document.getElementById('y-notes').value.trim()||null};
+  setSyncStatus('syncing','saving…');
+  const{error}=await sb.from('yarn').upsert(row);
+  if(error){showToast('Save failed: '+error.message);setSyncStatus('error','save error');return;}
+  const yarn=dbToYarn(row);
+  if(eYId){const i=state.yarn.findIndex(y=>y.id===eYId);state.yarn[i]=yarn;}else state.yarn.unshift(yarn);
+  setSyncStatus('','synced');showToast('Saved');closeModal('yarn-modal');renderYarn();
 }
+
+async function delYarn(id){
+  if(!confirm('Remove this yarn?'))return;
+  setSyncStatus('syncing','deleting…');
+  await sb.from('yarn').delete().eq('id',id);
+  state.yarn=state.yarn.filter(y=>y.id!==id);
+  setSyncStatus('','synced');renderYarn();
+}
+
+// ── NEEDLES ──
+function getNeedleUsage(nid){return state.projects.filter(p=>p.status==='in-progress'&&(p.needleIds||[]).includes(nid)).length;}
 
 function renderNeedles(){
-  const grid=document.getElementById('needles-grid');
-  if(!state.needles.length){grid.innerHTML='<div class="empty-state"><div class="empty-title">No needles yet</div><div class="empty-sub">Add your needle collection above</div></div>';return;}
+  const grid=document.getElementById('needle-grid');
+  if(!state.needles.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">No needles yet</div><div class="empty-sub">Add your needle collection above</div></div>';return;}
   grid.innerHTML=state.needles.map(n=>{
-    const av=getNeedleAvailability(n);
-    const availColor=av.available>0?'var(--sage-dark)':'var(--terra)';
-    return `<div class="needle-card"><div class="needle-size-badge">${esc(n.us||n.mm||'?')}</div><div style="flex:1"><div class="needle-name">${esc(n.us?n.us+' / ':'')}${esc(n.mm||'')}</div><div class="needle-detail">${esc(n.type)} · ${esc(n.material)}${n.length?' · '+esc(n.length):''}</div>${n.brand?`<div class="needle-detail">${esc(n.brand)}</div>`:''}<span class="type-badge">${esc(n.type)}</span><div class="needle-avail" style="margin-top:6px;font-size:10px;font-family:var(--fb);"><span class="avail" style="color:var(--ink-mid)">${av.owned} owned</span> · <span style="color:var(--terra)">${av.inUse} in use</span> · <span style="color:${availColor};font-weight:400">${av.available} available</span></div>${av.inUse>0?`<div style="font-size:10px;color:var(--ink-light);margin-top:2px;">Used in: ${av.projects.map(esc).join(', ')}</div>`:''}</div><div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;"><button class="btn-sm" onclick="openNeedleModal('${n.id}')">Edit</button><button class="btn-sm danger" onclick="delNeedle('${n.id}')">Del</button></div></div>`;
+    const inUse=getNeedleUsage(n.id),qty=n.qty||1,avail=Math.max(0,qty-inUse);
+    const availClass=avail>0?'avail-ok':'avail-busy';
+    const availText=avail>0?`${avail} of ${qty} available`:`All ${qty} in use`;
+    return `<div class="needle-card"><div class="needle-icon">🪡</div><div style="flex:1"><div class="needle-size">${esc(n.us||'')} ${n.mm?'/ '+esc(n.mm):''}</div><div class="needle-detail">${esc(n.type)} · ${esc(n.material)}${n.length?' · '+esc(n.length):''}</div><div class="needle-detail">${n.brand?esc(n.brand):''}${n.notes?' · '+esc(n.notes):''}</div><span class="avail-badge ${availClass}">${availText}</span><div style="margin-top:8px;display:flex;gap:6px"><button class="btn-sm" onclick="openNeedleModal('${n.id}')">Edit</button><button class="btn-sm danger" onclick="delNeedle('${n.id}')">Delete</button></div></div></div>`;
   }).join('');
 }
 
 function openNeedleModal(id){
   eNId=id||null;const n=id?state.needles.find(x=>x.id===id):null;
   document.getElementById('needle-modal-title').textContent=n?'Edit Needles':'Add Needles';
-  document.getElementById('n-us').value=n?(n.us||''):'';document.getElementById('n-mm').value=n?(n.mm||''):'';
-  document.getElementById('n-type').value=n?n.type:'Straight';document.getElementById('n-material').value=n?n.material:'Metal';
-  document.getElementById('n-length').value=n?(n.length||''):'';document.getElementById('n-brand').value=n?(n.brand||''):'';
-  document.getElementById('n-qty').value=n?(n.qty||1):1;document.getElementById('n-notes').value=n?(n.notes||''):'';
+  document.getElementById('n-us').value=n?(n.us||''):'';
+  document.getElementById('n-mm').value=n?(n.mm||''):'';
+  document.getElementById('n-type').value=n?n.type:'Straight';
+  document.getElementById('n-material').value=n?n.material:'Metal';
+  document.getElementById('n-length').value=n?(n.length||''):'';
+  document.getElementById('n-brand').value=n?(n.brand||''):'';
+  document.getElementById('n-qty').value=n?(n.qty||1):1;
+  document.getElementById('n-notes').value=n?(n.notes||''):'';
   document.getElementById('needle-modal').classList.remove('hidden');
 }
-function saveNeedle(){
+
+async function saveNeedle(){
   const us=document.getElementById('n-us').value.trim(),mm=document.getElementById('n-mm').value.trim();
   if(!us&&!mm){alert('Please enter a needle size');return;}
-  const needle={id:eNId||uid(),us,mm,type:document.getElementById('n-type').value,material:document.getElementById('n-material').value,length:document.getElementById('n-length').value.trim(),brand:document.getElementById('n-brand').value.trim(),qty:parseInt(document.getElementById('n-qty').value)||1,notes:document.getElementById('n-notes').value.trim()};
-  if(eNId){const i=state.needles.findIndex(n=>n.id===eNId);state.needles[i]=needle;}else state.needles.unshift(needle);
-  save();closeModal('needle-modal');renderNeedles();
+  const row={id:eNId||uid(),us:us||null,mm:mm||null,type:document.getElementById('n-type').value,material:document.getElementById('n-material').value,length:document.getElementById('n-length').value.trim()||null,brand:document.getElementById('n-brand').value.trim()||null,qty:parseInt(document.getElementById('n-qty').value)||1,notes:document.getElementById('n-notes').value.trim()||null};
+  setSyncStatus('syncing','saving…');
+  const{error}=await sb.from('needles').upsert(row);
+  if(error){showToast('Save failed: '+error.message);setSyncStatus('error','save error');return;}
+  if(eNId){const i=state.needles.findIndex(n=>n.id===eNId);state.needles[i]=row;}else state.needles.unshift(row);
+  setSyncStatus('','synced');showToast('Saved');closeModal('needle-modal');renderNeedles();
 }
-function delNeedle(id){if(!confirm('Remove these needles?'))return;state.needles=state.needles.filter(n=>n.id!==id);save();renderNeedles();}
 
-/* ── ACQUIRE ── */
+async function delNeedle(id){
+  if(!confirm('Remove these needles?'))return;
+  await sb.from('needles').delete().eq('id',id);
+  state.needles=state.needles.filter(n=>n.id!==id);
+  renderNeedles();
+}
+
+// ── ACQUIRE ──
 function renderAcquire(){
-  const list=document.getElementById('acquire-list');
-  const items=state.acquire||[];
-  if(!items.length){list.innerHTML='<div class="empty-state"><div class="empty-title">Nothing on the list yet</div><div class="empty-sub">Add things you want to pick up</div></div>';return;}
-  list.innerHTML=items.map(a=>{
-    const isLink=a.link&&(a.link.startsWith('http')||a.link.startsWith('www'));
-    const linkEl=a.link?(isLink?`<a href="${esc(a.link)}" target="_blank" rel="noopener">${esc(a.link)}</a>`:esc(a.link)):'';
-    return `<div class="acquire-item" id="acq-${a.id}">
-      <div class="acquire-check${a.done?' checked':''}" onclick="toggleAcquire('${a.id}')"></div>
-      <div class="acquire-info">
-        <div class="acquire-name">${esc(a.name)}</div>
-        <div class="acquire-meta">${esc(a.type)}${linkEl?' · '+linkEl:''}</div>
-      </div>
-      <span class="priority-badge priority-${a.priority}">${a.priority==='must'?'Must Have':a.priority==='wanting'?'Wanting':'Nice to Have'}</span>
-      <button class="btn-sm danger" onclick="delAcquire('${a.id}')">Del</button>
-    </div>`;
+  const el=document.getElementById('acquire-list');
+  const list=state.acquire||[];
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-title">Wishlist is empty</div><div class="empty-sub">Add items you want to pick up</div></div>';return;}
+  const order={must:0,wanting:1,nice:2};
+  const sorted=[...list].sort((a,b)=>(order[a.priority]||2)-(order[b.priority]||2));
+  el.innerHTML=sorted.map(aq=>{
+    const pClass={must:'priority-must',wanting:'priority-wanting',nice:'priority-nice'}[aq.priority]||'priority-nice';
+    const pLabel={must:'Must Have',wanting:'Wanting',nice:'Nice to Have'}[aq.priority]||'Nice to Have';
+    const link=aq.notes&&(aq.notes.startsWith('http')||aq.notes.startsWith('www'))?`<a href="${esc(aq.notes)}" target="_blank" rel="noopener">${esc(aq.notes)}</a>`:esc(aq.notes||'');
+    return `<div class="acquire-card" id="aq-${aq.id}"><div class="acquire-check" onclick="acquireItem('${aq.id}')">✓</div><div style="flex:1"><div class="acquire-name">${esc(aq.name)}</div><div class="acquire-meta">${esc(aq.type||'')}${link?' · '+link:''}</div></div><span class="priority-badge ${pClass}">${pLabel}</span><button class="btn-sm danger" onclick="delAcquire('${aq.id}')">✕</button></div>`;
   }).join('');
 }
 
 function openAcquireModal(id){
-  eAId=id||null;const a=id?state.acquire.find(x=>x.id===id):null;
-  document.getElementById('acquire-modal-title').textContent=a?'Edit Item':'Add Item to Acquire';
-  document.getElementById('a-name').value=a?a.name:'';
-  document.getElementById('a-type').value=a?a.type:'Yarn';
-  document.getElementById('a-priority').value=a?a.priority:'wanting';
-  document.getElementById('a-link').value=a?(a.link||''):'';
+  eAId=id||null;const aq=id?(state.acquire||[]).find(x=>x.id===id):null;
+  document.getElementById('acquire-modal-title').textContent=aq?'Edit Item':'Add Item to Acquire';
+  document.getElementById('aq-name').value=aq?aq.name:'';
+  document.getElementById('aq-type').value=aq?aq.type:'Yarn';
+  document.getElementById('aq-priority').value=aq?aq.priority:'nice';
+  document.getElementById('aq-notes').value=aq?(aq.notes||''):'';
   document.getElementById('acquire-modal').classList.remove('hidden');
 }
-function saveAcquire(){
-  const name=document.getElementById('a-name').value.trim();if(!name){alert('Please enter an item name');return;}
-  const item={id:eAId||uid(),name,type:document.getElementById('a-type').value,priority:document.getElementById('a-priority').value,link:document.getElementById('a-link').value.trim(),done:false};
-  if(eAId){const i=state.acquire.findIndex(a=>a.id===eAId);state.acquire[i]=item;}else{if(!state.acquire)state.acquire=[];state.acquire.unshift(item);}
-  save();closeModal('acquire-modal');renderAcquire();
-}
-function toggleAcquire(id){
-  const a=state.acquire.find(x=>x.id===id);if(!a)return;
-  a.done=true;save();
-  const el=document.getElementById('acq-'+id);
-  if(el){el.classList.add('done');setTimeout(()=>{state.acquire=state.acquire.filter(x=>x.id!==id);save();renderAcquire();},600);}
-}
-function delAcquire(id){state.acquire=state.acquire.filter(a=>a.id!==id);save();renderAcquire();}
 
-/* ── PATTERNS ── */
+async function saveAcquire(){
+  const name=document.getElementById('aq-name').value.trim();if(!name){alert('Please enter an item name');return;}
+  const row={id:eAId||uid(),name,type:document.getElementById('aq-type').value,priority:document.getElementById('aq-priority').value,notes:document.getElementById('aq-notes').value.trim()||null};
+  setSyncStatus('syncing','saving…');
+  const{error}=await sb.from('acquire').upsert(row);
+  if(error){showToast('Save failed: '+error.message);setSyncStatus('error','save error');return;}
+  if(!state.acquire)state.acquire=[];
+  if(eAId){const i=state.acquire.findIndex(a=>a.id===eAId);state.acquire[i]=row;}else state.acquire.unshift(row);
+  setSyncStatus('','synced');showToast('Saved');closeModal('acquire-modal');renderAcquire();
+}
+
+async function acquireItem(id){
+  const el=document.getElementById('aq-'+id);
+  if(el){el.style.opacity='0';el.style.transform='translateX(40px)';el.style.transition='all .3s';}
+  setTimeout(async()=>{
+    await sb.from('acquire').delete().eq('id',id);
+    state.acquire=state.acquire.filter(a=>a.id!==id);
+    renderAcquire();
+  },300);
+}
+
+async function delAcquire(id){
+  await sb.from('acquire').delete().eq('id',id);
+  state.acquire=(state.acquire||[]).filter(a=>a.id!==id);
+  renderAcquire();
+}
+
+// ── PATTERNS ──
 function renderPatterns(){
-  const grid=document.getElementById('patterns-grid');
-  if(!state.patterns.length){grid.innerHTML='<div class="empty-state"><div class="empty-title">No patterns yet</div><div class="empty-sub">Import a PDF to get started</div></div>';return;}
-  grid.innerHTML=state.patterns.map(p=>{
-    const linked=state.projects.filter(pr=>pr.patternId===p.id);
-    return `<div class="pattern-card"><div class="pattern-card-top"><div class="pattern-icon">📄</div><div style="flex:1"><div class="pattern-name">${esc(p.name)}</div>${linked.length?`<div style="font-size:10px;font-family:var(--fb);font-weight:300;color:var(--ink-light);margin-top:3px;">Used in: ${linked.map(l=>esc(l.name)).join(', ')}</div>`:''}</div></div><div class="pattern-card-foot"><button class="btn-sm primary" onclick="openPdf('${p.id}')">Open →</button><button class="btn-sm danger" onclick="delPattern('${p.id}')">Delete</button></div></div>`;
-  }).join('');
+  const el=document.getElementById('patterns-list');
+  if(!state.patterns.length){el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">No patterns yet</div><div class="empty-sub">Import a PDF to get started</div></div>';return;}
+  const linked=new Set(state.projects.filter(p=>p.patternId).map(p=>p.patternId));
+  el.innerHTML=state.patterns.map(p=>`
+    <div class="pattern-card">
+      <div class="pattern-card-inner">
+        <div class="pattern-icon">📄</div>
+        <div class="pattern-info">
+          <div class="pattern-name">${esc(p.name)}</div>
+          <div class="pattern-meta">${linked.has(p.id)?'Linked to a project':'Not linked to a project'}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn-open" onclick="openPdf('${p.id}')">Open →</button>
+          <button class="btn-sm danger" onclick="delPattern('${p.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`).join('');
 }
 
-function openPatternModal(){document.getElementById('pat-name').value='';document.getElementById('pat-pdf-data').value='';document.getElementById('pdf-upload-label').textContent='Click to choose a PDF file';document.getElementById('pat-modal').classList.remove('hidden');}
-function handlePdfUpload(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{document.getElementById('pat-pdf-data').value=ev.target.result;document.getElementById('pdf-upload-label').textContent='✓ '+f.name;};r.readAsDataURL(f);}
-function savePattern(){
-  const name=document.getElementById('pat-name').value.trim(),data=document.getElementById('pat-pdf-data').value;
+function openPatternModal(){
+  selectedPdfFile=null;
+  document.getElementById('pat-name').value='';
+  document.getElementById('pdf-upload-label').textContent='Click to choose a PDF file';
+  document.getElementById('pat-modal').classList.remove('hidden');
+}
+
+function handlePdfSelect(e){
+  selectedPdfFile=e.target.files[0]||null;
+  if(selectedPdfFile)document.getElementById('pdf-upload-label').textContent='✓ '+selectedPdfFile.name;
+}
+
+async function savePattern(){
+  const name=document.getElementById('pat-name').value.trim();
   if(!name){alert('Please enter a pattern name');return;}
-  if(!data){alert('Please choose a PDF file');return;}
+  if(!selectedPdfFile){alert('Please choose a PDF file');return;}
   const id=uid();
-  if(!savePdf(id,data))return;
-  const pat={id,name,pdfData:data,notes:[],highlightPos:{},counter:1};
-  state.patterns.unshift(pat);
-  save();closeModal('pat-modal');renderPatterns();
-  const used=getStorageUsedMB();
-  if(parseFloat(used)>3.5)showToast('Storage at '+used+'MB — export a backup soon');
+  const path=`pdfs/${id}-${selectedPdfFile.name.replace(/\s/g,'_')}`;
+  setSyncStatus('syncing','uploading PDF…');
+  showToast('Uploading PDF…',8000);
+  const{error:upErr}=await sb.storage.from('pdfs').upload(path,selectedPdfFile,{contentType:'application/pdf'});
+  if(upErr){showToast('PDF upload failed: '+upErr.message);setSyncStatus('error','upload error');return;}
+  const{data:urlData}=sb.storage.from('pdfs').getPublicUrl(path);
+  const row={id,name,pdf_url:urlData.publicUrl,pdf_path:path,notes:[],highlight_pos:{},counter:1};
+  const{error:dbErr}=await sb.from('patterns').insert(row);
+  if(dbErr){showToast('Save failed: '+dbErr.message);setSyncStatus('error','save error');return;}
+  state.patterns.unshift({id,name,notes:[],highlightPos:{},counter:1,pdfUrl:urlData.publicUrl,pdfPath:path});
+  setSyncStatus('','synced');showToast('Pattern saved');
+  closeModal('pat-modal');renderPatterns();
+  selectedPdfFile=null;
 }
-function delPattern(id){if(!confirm('Delete this pattern?'))return;deletePdf(id);state.patterns=state.patterns.filter(p=>p.id!==id);save();renderPatterns();}
 
-/* ── PDF VIEWER ── */
-function openPdf(id){
-  const pat=state.patterns.find(p=>p.id===id);if(!pat)return;
-  curPat=id;document.getElementById('pdf-title').textContent=pat.name;
-  document.getElementById('pdf-viewer').classList.remove('hidden');document.body.style.overflow='hidden';
+async function delPattern(id){
+  if(!confirm('Delete this pattern?'))return;
+  const pat=state.patterns.find(p=>p.id===id);
+  if(pat&&pat.pdfPath)await sb.storage.from('pdfs').remove([pat.pdfPath]);
+  await sb.from('patterns').delete().eq('id',id);
+  state.patterns=state.patterns.filter(p=>p.id!==id);
+  renderPatterns();
+}
+
+// ── PDF VIEWER ──
+async function openPdf(id){
+  const pat=state.patterns.find(p=>p.id===id);if(!pat||!pat.pdfUrl)return;
+  curPat=id;
+  document.getElementById('pdf-title').textContent=pat.name;
+  document.getElementById('pdf-viewer').classList.remove('hidden');
+  document.body.style.overflow='hidden';
   cVal=pat.counter||1;document.getElementById('c-val').textContent=cVal;
   hlOn=false;document.getElementById('hl-btn').classList.remove('active');document.getElementById('row-highlight').classList.remove('visible');
-  pdfZoom=1;
-  pdfjsLib.getDocument(pat.pdfData).promise.then(doc=>{pdfDoc=doc;pdfTotal=doc.numPages;pdfPage=1;renderPdfPage(true);}).catch(err=>alert('Could not load PDF: '+err.message));
+  pdfScale=1;pdfBaseScale=1;
+  try{
+    const loadingTask=pdfjsLib.getDocument(pat.pdfUrl);
+    pdfDoc=await loadingTask.promise;
+    pdfTotal=pdfDoc.numPages;pdfPage=1;
+    renderPdfPage(true);
+  }catch(err){alert('Could not load PDF: '+err.message);}
   renderNotes();
 }
 
@@ -850,101 +956,97 @@ function renderPdfPage(fitToWidth){
   pdfDoc.getPage(pdfPage).then(page=>{
     const area=document.getElementById('pdf-canvas-area');
     const availW=area.clientWidth-40;
-    const availH=area.clientHeight-40;
-    const nativeVp=page.getViewport({scale:1});
-    if(fitToWidth||pdfBaseScale===1){
-      pdfBaseScale=Math.min(availW/nativeVp.width, availH/nativeVp.height, 2);
-    }
-    const scale=pdfBaseScale*pdfZoom;
+    const nativeW=page.getViewport({scale:1}).width;
+    pdfBaseScale=availW/nativeW;
+    if(fitToWidth)pdfScale=1;
+    const scale=pdfBaseScale*pdfScale;
     const vp=page.getViewport({scale});
     const canvas=document.getElementById('pdf-canvas');
     canvas.width=vp.width;canvas.height=vp.height;
-    canvas.style.width=vp.width+'px';canvas.style.height=vp.height+'px';
     page.render({canvasContext:canvas.getContext('2d'),viewport:vp});
     document.getElementById('pdf-page-info').textContent=pdfPage+' / '+pdfTotal;
+    document.getElementById('zoom-info').textContent=Math.round(pdfScale*100)+'%';
     const hl=document.getElementById('row-highlight');
     const pat=state.patterns.find(p=>p.id===curPat);
-    const saved=pat&&pat.highlightPos&&pat.highlightPos[pdfPage];
-    const hlTop=saved?Math.round(saved*(scale/(pat.lastScale||scale))):Math.floor(vp.height*0.3);
-    hl.style.top=hlTop+'px';
-    if(pat)pat.lastScale=scale;
+    const savedRatio=pat&&pat.highlightPos&&pat.highlightPos[pdfPage];
+    hl.style.top=(savedRatio?savedRatio*vp.height:vp.height*0.3)+'px';
     if(hlOn)hl.classList.add('visible');else hl.classList.remove('visible');
   });
 }
 
-function adjustZoom(delta){
-  pdfZoom=Math.max(0.5,Math.min(4,pdfZoom+delta));
-  renderPdfPage(false);
-}
-function resetZoom(){pdfZoom=1;renderPdfPage(true);}
+function resetZoom(){pdfScale=1;renderPdfPage(true);}
 
 function changePage(d){
   const n=pdfPage+d;if(n<1||n>pdfTotal)return;
-  saveHl();pdfPage=n;renderPdfPage(true);renderNotes();
+  saveHlPos();pdfPage=n;renderPdfPage(true);renderNotes();
 }
-function saveHl(){
+
+async function saveHlPos(){
   const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;
   if(!pat.highlightPos)pat.highlightPos={};
   const canvas=document.getElementById('pdf-canvas');
   const top=parseInt(document.getElementById('row-highlight').style.top)||0;
   pat.highlightPos[pdfPage]=canvas.height>0?top/canvas.height:0.3;
-  const slim={...state,patterns:(state.patterns||[]).map(p=>{const{pdfData,...rest}=p;return rest;})};
-  try{localStorage.setItem('ks-v3',JSON.stringify(slim));}catch(e){}
+  await sb.from('patterns').update({highlight_pos:pat.highlightPos}).eq('id',curPat);
 }
 
-/* Row highlight drag — mouse + touch */
+// Pinch zoom
+const pdfArea=document.getElementById('pdf-canvas-area');
+let pinchDist0=0,pinchScale0=1;
+pdfArea.addEventListener('touchstart',e=>{
+  if(e.touches.length===2){pinchDist0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pinchScale0=pdfScale;e.preventDefault();}
+},{passive:false});
+pdfArea.addEventListener('touchmove',e=>{
+  if(e.touches.length===2&&pinchDist0>0){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pdfScale=Math.min(4,Math.max(0.5,pinchScale0*(d/pinchDist0)));document.getElementById('zoom-info').textContent=Math.round(pdfScale*100)+'%';e.preventDefault();}
+},{passive:false});
+pdfArea.addEventListener('touchend',e=>{if(e.touches.length<2&&pinchDist0>0){pinchDist0=0;renderPdfPage(false);}});
+
+// Double tap zoom
+let lastTap=0;
+pdfArea.addEventListener('touchend',e=>{
+  if(e.touches.length>0)return;
+  const now=Date.now();
+  if(now-lastTap<300){pdfScale=pdfScale>1.2?1:2;renderPdfPage(false);}
+  lastTap=now;
+});
+
+// Swipe pages
+let swipeX=0,swipeY=0;
+pdfArea.addEventListener('touchstart',e=>{if(e.touches.length===1){swipeX=e.touches[0].clientX;swipeY=e.touches[0].clientY;}},{passive:true});
+pdfArea.addEventListener('touchend',e=>{
+  if(e.changedTouches.length===1&&pinchDist0===0){
+    const dx=e.changedTouches[0].clientX-swipeX,dy=e.changedTouches[0].clientY-swipeY;
+    if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){if(dx<0)changePage(1);else changePage(-1);}
+  }
+},{passive:true});
+
+// Row highlight drag
 const hlEl=document.getElementById('row-highlight');
 let drag=false,dY=0,dT=0;
 hlEl.addEventListener('mousedown',e=>{drag=true;dY=e.clientY;dT=parseInt(hlEl.style.top)||0;e.preventDefault();});
 hlEl.addEventListener('touchstart',e=>{drag=true;dY=e.touches[0].clientY;dT=parseInt(hlEl.style.top)||0;e.stopPropagation();},{passive:true});
 document.addEventListener('mousemove',e=>{if(!drag)return;const mx=document.getElementById('pdf-canvas').height-hlEl.offsetHeight;hlEl.style.top=Math.max(0,Math.min(mx,dT+e.clientY-dY))+'px';});
 document.addEventListener('touchmove',e=>{if(!drag)return;const mx=document.getElementById('pdf-canvas').height-hlEl.offsetHeight;hlEl.style.top=Math.max(0,Math.min(mx,dT+e.touches[0].clientY-dY))+'px';},{passive:true});
-document.addEventListener('mouseup',()=>{if(drag){drag=false;saveHl();}});
-document.addEventListener('touchend',()=>{if(drag){drag=false;saveHl();}});
-
-/* Pinch-to-zoom on PDF canvas area */
-const pdfArea=document.getElementById('pdf-scroll-container');
-let pinchDist0=0,pinchZoom0=1;
-function getPinchDist(e){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;return Math.sqrt(dx*dx+dy*dy);}
-pdfArea.addEventListener('touchstart',e=>{if(e.touches.length===2){pinchDist0=getPinchDist(e);pinchZoom0=pdfZoom;e.preventDefault();}},{passive:false});
-pdfArea.addEventListener('touchmove',e=>{if(e.touches.length===2&&pinchDist0>0){const d=getPinchDist(e);pdfZoom=Math.max(0.5,Math.min(4,pinchZoom0*(d/pinchDist0)));renderPdfPage(false);e.preventDefault();}},{passive:false});
-pdfArea.addEventListener('touchend',e=>{if(e.touches.length<2){pinchDist0=0;if(drag){drag=false;saveHl();}}},{passive:true});
-
-/* Double-tap to zoom */
-let lastTap=0;
-pdfArea.addEventListener('touchend',e=>{
-  if(e.touches.length>0)return;
-  const now=Date.now();
-  if(now-lastTap<300){pdfZoom=pdfZoom>1.2?1:2;renderPdfPage(false);}
-  lastTap=now;
-},{passive:true});
-
-/* Swipe left/right for page navigation */
-let swipeX0=0;
-pdfArea.addEventListener('touchstart',e=>{if(e.touches.length===1)swipeX0=e.touches[0].clientX;},{passive:true});
-pdfArea.addEventListener('touchend',e=>{
-  if(e.touches.length>0||pinchDist0>0)return;
-  const dx=e.changedTouches[0].clientX-swipeX0;
-  if(Math.abs(dx)>60&&pdfZoom<=1.05){
-    if(dx<0)changePage(1);else changePage(-1);
-  }
-},{passive:true});
+document.addEventListener('mouseup',()=>{if(drag){drag=false;saveHlPos();}});
+document.addEventListener('touchend',()=>{if(drag){drag=false;saveHlPos();}});
 
 function toggleHighlight(){
   hlOn=!hlOn;document.getElementById('hl-btn').classList.toggle('active',hlOn);
   const hl=document.getElementById('row-highlight');
-  if(hlOn){hl.classList.add('visible');if(!hl.style.top||hl.style.top==='0px'){const pat=state.patterns.find(p=>p.id===curPat);const saved=pat&&pat.highlightPos&&pat.highlightPos[pdfPage];hl.style.top=(saved||Math.floor(document.getElementById('pdf-canvas').height*0.3))+'px';}}
+  if(hlOn){hl.classList.add('visible');if(!hl.style.top||hl.style.top==='0px'){hl.style.top=Math.floor(document.getElementById('pdf-canvas').height*0.3)+'px';}}
   else hl.classList.remove('visible');
 }
 
-function cUp(){if(cVal>=99)return;cVal++;document.getElementById('c-val').textContent=cVal;saveC();}
-function cDown(){if(cVal<=1)return;cVal--;document.getElementById('c-val').textContent=cVal;saveC();}
-function cReset(){cVal=1;document.getElementById('c-val').textContent=1;saveC();}
-function saveC(){
-  const p=state.patterns.find(p=>p.id===curPat);
-  if(p){p.counter=cVal;save();}
+function cUp(){if(cVal>=99)return;cVal++;document.getElementById('c-val').textContent=cVal;saveCounter();}
+function cDown(){if(cVal<=1)return;cVal--;document.getElementById('c-val').textContent=cVal;saveCounter();}
+function cReset(){cVal=1;document.getElementById('c-val').textContent=1;saveCounter();}
+async function saveCounter(){
+  const p=state.patterns.find(p=>p.id===curPat);if(!p)return;
+  p.counter=cVal;
+  await sb.from('patterns').update({counter:cVal}).eq('id',curPat);
 }
 
+// ── NOTES ──
 function renderNotes(){
   const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;
   const notes=(pat.notes||[]).slice().sort((a,b)=>a.page===pdfPage&&b.page!==pdfPage?-1:b.page===pdfPage&&a.page!==pdfPage?1:a.page-b.page);
@@ -952,50 +1054,64 @@ function renderNotes(){
   if(!notes.length){el.innerHTML='<div style="font-size:11px;color:#6a5a40;padding:10px">No notes yet.</div>';return;}
   el.innerHTML=notes.map(n=>`<div class="note-card"><div class="note-card-head"><span>Page ${n.page}</span><button class="btn-del-note" onclick="delNote('${n.id}')">×</button></div><textarea class="note-ta" rows="3" onchange="updateNote('${n.id}',this.value)">${esc(n.text)}</textarea></div>`).join('');
 }
-function addNote(){const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;if(!pat.notes)pat.notes=[];pat.notes.push({id:uid(),page:pdfPage,text:''});save();renderNotes();setTimeout(()=>{const t=document.querySelectorAll('.note-ta');if(t.length)t[t.length-1].focus();},50);}
-function updateNote(id,text){const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;const n=pat.notes.find(n=>n.id===id);if(n){n.text=text;save();}}
-function delNote(id){const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;pat.notes=pat.notes.filter(n=>n.id!==id);save();renderNotes();}
+
+async function addNote(){
+  const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;
+  if(!pat.notes)pat.notes=[];
+  pat.notes.push({id:uid(),page:pdfPage,text:''});
+  await sb.from('patterns').update({notes:pat.notes}).eq('id',curPat);
+  renderNotes();
+  setTimeout(()=>{const t=document.querySelectorAll('.note-ta');if(t.length)t[t.length-1].focus();},50);
+}
+
+async function updateNote(id,text){
+  const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;
+  const n=pat.notes.find(n=>n.id===id);if(!n)return;
+  n.text=text;
+  await sb.from('patterns').update({notes:pat.notes}).eq('id',curPat);
+}
+
+async function delNote(id){
+  const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;
+  pat.notes=pat.notes.filter(n=>n.id!==id);
+  await sb.from('patterns').update({notes:pat.notes}).eq('id',curPat);
+  renderNotes();
+}
+
 function toggleNotes(){nCollapsed=!nCollapsed;document.getElementById('notes-panel').classList.toggle('collapsed',nCollapsed);document.getElementById('notes-toggle').textContent=nCollapsed?'▶':'◀';}
 
-/* ── BACKUP ── */
+// ── BACKUP ──
 function exportBackup(){
-  // Export includes full PDF data
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
   a.download='knitting-backup-'+new Date().toISOString().slice(0,10)+'.json';
   a.click();
 }
-function importBackup(e){
+
+async function importBackup(e){
   const f=e.target.files[0];if(!f)return;
-  if(!confirm('This will replace all data. Continue?'))return;
+  if(!confirm('This will merge backup data into your Supabase database. Continue?'))return;
   const r=new FileReader();
-  r.onload=ev=>{
+  r.onload=async ev=>{
     try{
       const imported=JSON.parse(ev.target.result);
-      if(!imported.needles)imported.needles=[];
-      if(!imported.acquire)imported.acquire=[];
-      // Save PDFs to separate keys, then save slim state
-      (imported.patterns||[]).forEach(p=>{
-        if(p.pdfData){
-          try{localStorage.setItem('ks-pdf-'+p.id,p.pdfData);}catch(e){console.warn('Could not restore PDF for',p.name);}
-        }
-      });
-      state=imported;
-      save();
+      showToast('Importing…',5000);
+      // Upsert all records
+      if(imported.projects?.length)await sb.from('projects').upsert(imported.projects.map(p=>({id:p.id,name:p.name,status:p.status,needle:p.needle,ravelry:p.ravelry,pattern_id:p.patternId,progress:p.progress,start_date:p.startDate,end_date:p.endDate,notes:p.notes,target_yards:p.targetYards,yarn_ids:p.yarnIds||[],needle_ids:p.needleIds||[],photos:p.photos||[]})));
+      if(imported.yarn?.length)await sb.from('yarn').upsert(imported.yarn.map(y=>({id:y.id,name:y.name,brand:y.brand,colour_name:y.colourName,colour:y.colour,weight:y.weight,fibre:y.fibre,yardage:y.yardage,skeins:y.skeins,notes:y.notes})));
+      if(imported.needles?.length)await sb.from('needles').upsert(imported.needles);
+      if(imported.acquire?.length)await sb.from('acquire').upsert(imported.acquire);
+      await loadAll();
       renderProjects();
       showToast('Imported!');
-      switchTab('projects');
-    }catch(err){alert('Invalid backup file');}
+    }catch(err){alert('Import failed: '+err.message);}
   };
   r.readAsText(f);
   e.target.value='';
 }
 
-/* ── INIT ── */
-load();
-if(!state.needles)state.needles=[];
-if(!state.acquire)state.acquire=[];
-renderProjects();
+// ── START ──
+init();
 </script>
 </body>
 </html>
