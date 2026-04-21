@@ -636,9 +636,21 @@ function setSyncStatus(status,msg){
 
 // ── INIT ──
 async function init(){
-  document.getElementById('loading-msg').textContent='Loading your data…';
+  const msgEl=document.getElementById('loading-msg');
+  msgEl.textContent='Loading your data…';
+  // Validate credentials look right before even trying
+  if(!SUPABASE_URL||SUPABASE_URL==='YOUR_SUPABASE_URL'||!SUPABASE_ANON_KEY||SUPABASE_ANON_KEY==='YOUR_SUPABASE_ANON_KEY'){
+    msgEl.textContent='Supabase credentials missing — check SUPABASE_URL and SUPABASE_ANON_KEY in the file.';
+    return;
+  }
+  if(!SUPABASE_URL.startsWith('https://')){
+    msgEl.textContent='SUPABASE_URL looks wrong — should start with https://';
+    return;
+  }
+  // 12 second timeout so it never hangs silently
+  const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('Request timed out after 12s — check your internet connection and that your Supabase project is not paused.')),12000));
   try{
-    await loadAll();
+    await Promise.race([loadAll(),timeout]);
     document.getElementById('loading-screen').classList.add('hidden');
     document.getElementById('app-header').classList.remove('hidden');
     document.getElementById('app-nav').classList.remove('hidden');
@@ -648,7 +660,7 @@ async function init(){
     setupEventListeners();
   }catch(e){
     const msg=e&&e.message?e.message:String(e);
-    document.getElementById('loading-msg').textContent='Error: '+msg;
+    msgEl.textContent='Error: '+msg;
     console.error(e);
   }
 }
