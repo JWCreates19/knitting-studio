@@ -293,6 +293,8 @@ body{background:var(--cream);font-family:var(--f-body);font-weight:300;color:var
 .stash-note-trigger{position:relative;display:inline-flex;align-items:center;}
 .stash-note-dot{position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:var(--terra);border-radius:50%;border:1.5px solid var(--cream);display:none;}
 .stash-note-dot.visible{display:block;}
+.stash-notes-overlay{position:fixed;inset:0;z-index:499;display:none;}
+.stash-notes-overlay.open{display:block;}
 </style>
 
 </head>
@@ -361,7 +363,7 @@ body{background:var(--cream);font-family:var(--f-body);font-weight:300;color:var
       <div style="display:flex;gap:8px;align-items:center;">
         <input class="search-input" type="text" placeholder="Search yarn…" id="yarn-search" oninput="renderYarn()" style="width:160px;">
         <span class="stash-note-trigger">
-          <button class="btn-utility" onclick="openStashNote('yarn')">Notes</button>
+          <button class="btn-sm" onclick="openStashNote('yarn')">Notes</button>
           <span class="stash-note-dot" id="yarn-note-dot"></span>
         </span>
         <button class="btn-add" onclick="openYarnModal()">+ Add</button>
@@ -379,7 +381,7 @@ body{background:var(--cream);font-family:var(--f-body);font-weight:300;color:var
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <span class="stash-note-trigger">
-          <button class="btn-utility" onclick="openStashNote('needles')">Notes</button>
+          <button class="btn-sm" onclick="openStashNote('needles')">Notes</button>
           <span class="stash-note-dot" id="needles-note-dot"></span>
         </span>
         <button class="btn-add" onclick="openNeedleModal()">+ Add</button>
