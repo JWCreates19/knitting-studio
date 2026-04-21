@@ -295,6 +295,94 @@ body{background:var(--cream);font-family:var(--f-body);font-weight:300;color:var
 .stash-note-dot.visible{display:block;}
 .stash-notes-overlay{position:fixed;inset:0;z-index:499;display:none;}
 .stash-notes-overlay.open{display:block;}
+
+/* DARK MODE */
+body.dark {
+  --cream:#161412;
+  --parchment:#1e1b18;
+  --parchment-d:#252220;
+  --ink:#ede8e0;
+  --ink-mid:#a89880;
+  --ink-light:#6a5e52;
+  --ink-faint:#3e3630;
+  --sage:#8fac78;
+  --sage-dark:#a8c490;
+  --sage-light:#1a2814;
+  --terra:#c48878;
+  --terra-light:#2a1816;
+  --sand:#c8a882;
+  --sand-light:#261e14;
+  --sky:#7aaac8;
+  --sky-light:#141e2a;
+  --lav:#a89ec8;
+  --lav-light:#1a1828;
+  --border:#2e2926;
+  --border-soft:#242018;
+  background-image:none;
+}
+body.dark .btn-add{background:var(--sage-dark);border-color:var(--sage-dark);color:#161412;}
+body.dark .btn-add:hover{background:var(--sage);border-color:var(--sage);}
+body.dark .btn-save{background:var(--sage-dark);border-color:var(--sage-dark);color:#161412;}
+body.dark .btn-save:hover{background:var(--sage);border-color:var(--sage);}
+body.dark .btn-sm{border-color:#3e3630;color:#a89880;}
+body.dark .btn-sm:hover{background:#252220;color:var(--sand);border-color:var(--sand);}
+body.dark .btn-sm.danger:hover{background:var(--terra-light);color:var(--terra);border-color:var(--terra);}
+body.dark .btn-open{border-color:#3e3630;color:#a89880;}
+body.dark .btn-open:hover{background:var(--sage-dark);color:#161412;border-color:var(--sage-dark);}
+body.dark .btn-utility{border-color:#3e3630;color:#a89880;}
+body.dark .btn-utility:hover{background:#252220;}
+body.dark .btn-cancel{border-color:#3e3630;color:var(--ink-light);}
+body.dark .form-input,body.dark .form-select,body.dark .form-textarea{background:#252220;border-color:#3e3630;color:var(--ink);}
+body.dark .form-input:focus,body.dark .form-select:focus,body.dark .form-textarea:focus{border-color:var(--sand);}
+body.dark .search-input{background:#1e1b18;border-color:#3e3630;color:var(--ink);}
+body.dark .search-input::placeholder{color:var(--ink-faint);}
+body.dark .filter-select{background:#1e1b18;border-color:#3e3630;color:var(--ink-mid);}
+body.dark .photo-upload{background:#252220;border-color:#3e3630;}
+body.dark .chip-sel-item{background:#252220;border-color:#3e3630;color:var(--ink-mid);}
+body.dark .chip-sel-item.selected{background:var(--sage-light);border-color:var(--sage-dark);color:var(--sage-dark);}
+body.dark .needle-multi-select{background:#252220;border-color:#3e3630;color:var(--ink);}
+body.dark .card{box-shadow:none;border-color:#2e2926;}
+body.dark .card:hover{box-shadow:none;}
+body.dark .yarn-card,body.dark .needle-card,body.dark .acquire-card,body.dark .feedback-card,body.dark .pattern-card{box-shadow:none;border-color:#2e2926;}
+body.dark .card-photos{background:#252220;}
+body.dark .card-photos-placeholder{color:var(--ink-faint);}
+body.dark .needle-row{background:var(--parchment);border-color:#2e2926;}
+body.dark .needle-row:hover{background:var(--parchment-d);}
+body.dark .status-in-progress{background:#1a2814;color:#a8c490;border-color:#2a4020;}
+body.dark .status-completed{background:#141e2a;color:#7aaac8;border-color:#203040;}
+body.dark .status-not-started{background:#261e14;color:#c8a882;border-color:#3e3020;}
+body.dark .status-on-hold{background:#2a1816;color:#c48878;border-color:#402820;}
+body.dark .weight-badge{background:#252220;color:#a89880;border-color:#3e3630;}
+body.dark .avail-ok{background:#1a2814;color:#a8c490;border-color:#2a4020;}
+body.dark .avail-busy{background:#2a1816;color:#c48878;border-color:#402820;}
+body.dark .priority-must{background:#2a1816;color:#c48878;border-color:#402820;}
+body.dark .priority-wanting{background:#261e14;color:#c8a882;border-color:#3e3020;}
+body.dark .priority-nice{background:#252220;color:#a89880;border-color:#3e3630;}
+body.dark .linked-badge{background:#1a1828;color:#a89ec8;border-color:#303050;}
+body.dark .cat-idea{background:#1a1828;color:#a89ec8;border-color:#303050;}
+body.dark .cat-enhancement{background:#1a2814;color:#a8c490;border-color:#2a4020;}
+body.dark .cat-bug{background:#2a1816;color:#c48878;border-color:#402820;}
+body.dark .pri-high{background:#2a1816;color:#c48878;border-color:#402820;}
+body.dark .pri-medium{background:#261e14;color:#c8a882;border-color:#3e3020;}
+body.dark .pri-low{background:#252220;color:#a89880;border-color:#3e3630;}
+body.dark .nav-tabs,body.dark .app-header{border-color:#2e2926;}
+body.dark .nav-tab.active{border-bottom-color:var(--sage-dark);color:var(--sage-dark);}
+body.dark .section-header{border-color:#2e2926;}
+body.dark .stash-section-header{border-color:#2e2926;}
+body.dark .modal{background:#1e1b18;border-color:#2e2926;}
+body.dark .modal-overlay{background:rgba(0,0,0,.7);}
+body.dark .modal-title{border-color:#2e2926;}
+body.dark .modal-footer{border-color:#2e2926;}
+body.dark .progress-wrap{background:#252220;}
+body.dark ::-webkit-scrollbar-track{background:#1e1b18;}
+body.dark ::-webkit-scrollbar-thumb{background:#3e3630;}
+body.dark .photo-count-badge{background:rgba(0,0,0,.65);}
+body.dark .acquire-check{border-color:#3e3630;}
+body.dark .acquire-check:hover{border-color:var(--sage-dark);background:var(--sage-light);}
+body.dark .stash-notes-panel{background:#1e1b18;border-color:#2e2926;}
+body.dark .stash-notes-ta{color:var(--ink);}
+body.dark .stash-notes-header{border-color:#2e2926;}
+body.dark .stash-notes-footer{border-color:#2e2926;}
 </style>
 
 </head>
@@ -312,6 +400,7 @@ body{background:var(--cream);font-family:var(--f-body);font-weight:300;color:var
   <div class="app-title">Knitting <em>Studio</em></div>
   <div class="header-actions">
     <span class="sync-indicator" id="sync-indicator">●  synced</span>
+    <button class="btn-utility" id="dark-mode-btn" onclick="toggleDarkMode()" title="Toggle dark mode">🌙</button>
     <button class="btn-utility" onclick="exportBackup()">Export</button>
     <button class="btn-utility" onclick="document.getElementById('import-file').click()">Import</button>
     <input type="file" id="import-file" accept=".json" class="hidden" onchange="importBackup(event)">
@@ -1444,6 +1533,18 @@ async function saveStashNote(section){
   statusEl.textContent='Saved';
   setTimeout(()=>{if(statusEl.textContent==='Saved')statusEl.textContent='';},2000);
   updateStashNoteDots();
+}
+
+
+// -- DARK MODE --
+function toggleDarkMode(){
+  document.body.classList.toggle('dark');
+  localStorage.setItem('ks-dark', document.body.classList.contains('dark')?'1':'0');
+  updateDarkBtn();
+}
+function updateDarkBtn(){
+  const btn=document.getElementById('dark-mode-btn');
+  if(btn) btn.textContent=document.body.classList.contains('dark')?'☀':'🌙';
 }
 
 function setupEventListeners(){
