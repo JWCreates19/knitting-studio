@@ -647,7 +647,8 @@ async function init(){
     setSyncStatus('','synced');
     setupEventListeners();
   }catch(e){
-    document.getElementById('loading-msg').textContent='Could not connect to Supabase. Check your credentials.';
+    const msg=e&&e.message?e.message:String(e);
+    document.getElementById('loading-msg').textContent='Error: '+msg;
     console.error(e);
   }
 }
@@ -670,7 +671,6 @@ async function loadAll(){
   state.feedback=feedback.data||[];
   state.stashNotes={yarn:'',needles:''};
   (notes.data||[]).forEach(n=>{if(n.section==='yarn'||n.section==='needles')state.stashNotes[n.section]=n.content||'';});
-  updateStashNoteDots();
 }
 
 // DB row converters
