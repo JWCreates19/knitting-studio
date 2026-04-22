@@ -922,6 +922,7 @@ function removeEditPhoto(i){
 }
 
 async function handleProjectPhoto(e){
+  if(demoGuard())return;
   const f=e.target.files[0];if(!f)return;
   setSyncStatus('syncing','uploading…');
   const path=`project-photos/${uid()}-${f.name.replace(/\s/g,'_')}`;
@@ -1089,6 +1090,7 @@ function openNeedleModal(id){
 }
 
 async function saveNeedle(){
+  if(demoGuard())return;
   const us=document.getElementById('n-us').value.trim(),mm=formatMmValue(document.getElementById('n-mm').value.trim());
   if(!us&&!mm){alert('Please enter a needle size');return;}
   const rawLength=document.getElementById('n-length').value.trim();
@@ -1280,12 +1282,14 @@ function changePage(d){
   saveHlPos();pdfPage=n;renderPdfPage(true);renderNotes();saveLastPage();
 }
 async function saveLastPage(){
+  if(isDemoMode)return;
   const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;
   pat.lastPage=pdfPage;
   await sb.from('patterns').update({last_page:pdfPage}).eq('id',curPat);
 }
 
 async function saveHlPos(){
+  if(isDemoMode)return;
   const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;
   if(!pat.highlightPos)pat.highlightPos={};
   const canvas=document.getElementById('pdf-canvas');
@@ -1306,6 +1310,7 @@ function cUp(){if(cVal>=99)return;if(cVal===0)cVal=1;else cVal++;document.getEle
 function cDown(){if(cVal<=0)return;cVal--;document.getElementById('c-val').textContent=cVal===0?'—':cVal;saveCounter();}
 function cReset(){cVal=0;document.getElementById('c-val').textContent='—';saveCounter();}
 async function saveCounter(){
+  if(isDemoMode)return;
   const p=state.patterns.find(p=>p.id===curPat);if(!p)return;
   p.counter=cVal;
   await sb.from('patterns').update({counter:cVal}).eq('id',curPat);
@@ -1322,6 +1327,7 @@ function renderNotes(){
 }
 
 async function addNote(){
+  if(demoGuard())return;
 const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;
 if(!pat.notes)pat.notes=[];
 pat.notes.push({id:uid(),page:pdfPage,text:''});
@@ -1331,6 +1337,7 @@ setTimeout(()=>{const t=document.querySelectorAll('.note-ta');if(t.length)t[t.le
 }
 
 async function updateNote(id,text){
+  if(isDemoMode)return;
 const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;
 const n=pat.notes.find(n=>n.id===id);if(!n)return;
 n.text=text;
@@ -1338,6 +1345,7 @@ await sb.from('patterns').update({notes:pat.notes}).eq('id',curPat);
 }
 
 async function delNote(id){
+  if(demoGuard())return;
 const pat=state.patterns.find(p=>p.id===curPat);if(!pat)return;
 pat.notes=pat.notes.filter(n=>n.id!==id);
 await sb.from('patterns').update({notes:pat.notes}).eq('id',curPat);
@@ -1355,6 +1363,7 @@ a.click();
 }
 
 async function importBackup(e){
+  if(demoGuard())return;
 const f=e.target.files[0];if(!f)return;
 if(!confirm('This will merge backup data into your Supabase database. Continue?'))return;
 const r=new FileReader();
