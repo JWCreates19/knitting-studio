@@ -257,16 +257,28 @@ body{background:var(--cream);font-family:var(--f-body);font-weight:300;color:var
 
 /* NEEDLE LIST ROW */
 .needle-list{display:flex;flex-direction:column;gap:0;}
-.needle-row{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border-soft);padding:8px 14px;background:var(--parchment);transition:background .12s;}
+.needle-row{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border-soft);padding:8px 14px;background:var(--parchment);transition:background .12s;flex-wrap:nowrap;overflow:hidden;}
 .needle-row:first-child{border-top:1px solid var(--border-soft);}
 .needle-row:hover{background:var(--parchment-d);}
-.needle-row-size{font-family:var(--f-display);font-size:15px;font-weight:400;color:var(--ink);min-width:110px;}
-.needle-row-brand{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-mid);min-width:100px;}
-.needle-row-type{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);min-width:100px;}
-.needle-row-material{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);min-width:90px;}
-.needle-row-length{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);min-width:50px;}
+.needle-row-size{font-family:var(--f-display);font-size:15px;font-weight:400;color:var(--ink);min-width:90px;flex-shrink:0;}
+.needle-row-brand{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-mid);min-width:80px;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.needle-row-type{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);min-width:70px;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.needle-row-material{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);min-width:60px;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.needle-row-length{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);min-width:36px;flex-shrink:0;}
 .needle-row-avail{font-family:var(--f-body);font-size:9px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:1px;flex-shrink:0;}
-.needle-row-actions{display:flex;gap:5px;margin-left:auto;flex-shrink:0;}
+.needle-row-actions{display:flex;gap:5px;margin-left:auto;flex-shrink:0;padding-left:8px;}
+/* Mobile: two-line compact layout */
+@media(max-width:600px){
+  .needle-row{flex-wrap:wrap;padding:10px 14px;gap:4px;}
+  .needle-row-size{font-size:14px;min-width:auto;width:auto;margin-right:8px;}
+  .needle-row-avail{order:2;margin-left:0;}
+  .needle-row-brand,.needle-row-type,.needle-row-material,.needle-row-length{display:none;}
+  .needle-row-meta{display:block;width:100%;font-family:var(--f-body);font-size:10px;font-weight:300;color:var(--ink-light);order:3;margin-top:2px;}
+  .needle-row-actions{order:1;margin-left:auto;padding-left:0;}
+}
+@media(min-width:601px){
+  .needle-row-meta{display:none;}
+}
 
 /* COLLAPSE TOGGLE */
 .stash-collapse-btn{background:none;border:none;cursor:pointer;font-size:11px;color:var(--ink-faint);padding:2px 6px;border-radius:2px;line-height:1;transition:color .12s;}
@@ -704,6 +716,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 // ── STATE ──
+let isDemoMode=false;
 let state={projects:[],yarn:[],needles:[],acquire:[],patterns:[],feedback:[],stashNotes:{yarn:'',needles:''}};
 let ePId=null,eYId=null,eNId=null,eAId=null;
 let pdfDoc=null,pdfPage=1,pdfTotal=1,curPat=null,cVal=0,hlOn=false,nCollapsed=false;
@@ -749,6 +762,7 @@ async function init(){
     renderProjects();
     setSyncStatus('','synced');
     setupEventListeners();
+    checkDemoMode();
   }catch(e){
     const msg=e&&e.message?e.message:String(e);
     msgEl.textContent='Error: '+msg;
@@ -922,6 +936,7 @@ async function handleProjectPhoto(e){
 }
 
 async function saveProject(){
+  if(demoGuard())return;
   const name=document.getElementById('p-name').value.trim();if(!name){alert('Please enter a project name');return;}
   const yarnIds=[...document.querySelectorAll('#p-yarn-sel .chip-sel-item.selected')].map(el=>el.dataset.id);
   const needleIds=[...document.getElementById('p-needle-sel').selectedOptions].map(o=>o.value);
@@ -949,6 +964,7 @@ async function saveProject(){
 }
 
 async function delProject(id){
+  if(demoGuard())return;
   if(!confirm('Delete this project?'))return;
   setSyncStatus('syncing','deleting…');
   const p=state.projects.find(x=>x.id===id);
@@ -1001,6 +1017,7 @@ function openYarnModal(id){
 }
 
 async function saveYarn(){
+  if(demoGuard())return;
   const name=document.getElementById('y-name').value.trim();if(!name){alert('Please enter a yarn name');return;}
   const row={id:eYId||uid(),name,brand:document.getElementById('y-brand').value.trim()||null,colour_name:document.getElementById('y-colname').value.trim()||null,colour:document.getElementById('y-colour').value,weight:document.getElementById('y-weight').value,fibre:document.getElementById('y-fibre').value.trim()||null,yardage:parseInt(document.getElementById('y-yards').value)||0,skeins:parseInt(document.getElementById('y-skeins').value)||1,notes:document.getElementById('y-notes').value.trim()||null};
   setSyncStatus('syncing','saving…');
@@ -1012,6 +1029,7 @@ async function saveYarn(){
 }
 
 async function delYarn(id){
+  if(demoGuard())return;
   if(!confirm('Remove this yarn?'))return;
   setSyncStatus('syncing','deleting…');
   await sb.from('yarn').delete().eq('id',id);
@@ -1037,6 +1055,9 @@ function renderNeedles(){
     const availText=avail>0?`${avail} of ${qty} avail`:`All ${qty} in use`;
     const sizeStr=[n.us?esc(n.us):null,n.mm?esc(n.mm):null].filter(Boolean).join(' / ');
     const parts=[n.brand?esc(n.brand):null,esc(n.type),esc(n.material),n.length?esc(n.length):null].filter(Boolean);
+    // Mobile meta line: brand · type · material · length
+    const metaParts=[n.brand?esc(n.brand):null,esc(n.type),esc(n.material),n.length?esc(n.length):null].filter(Boolean);
+    const metaStr=metaParts.join(' · ');
     return `<div class="needle-row">
       <div class="needle-row-size">${sizeStr}</div>
       <div class="needle-row-brand">${n.brand?esc(n.brand):''}</div>
@@ -1048,6 +1069,7 @@ function renderNeedles(){
         <button class="btn-sm" onclick="openNeedleModal('${n.id}')">Edit</button>
         <button class="btn-sm danger" onclick="delNeedle('${n.id}')">Delete</button>
       </div>
+      <div class="needle-row-meta">${metaStr}</div>
     </div>`;
   }).join('');
 }
@@ -1080,6 +1102,7 @@ async function saveNeedle(){
 }
 
 async function delNeedle(id){
+  if(demoGuard())return;
   if(!confirm('Remove these needles?'))return;
   await sb.from('needles').delete().eq('id',id);
   state.needles=state.needles.filter(n=>n.id!==id);
@@ -1112,6 +1135,7 @@ function openAcquireModal(id){
 }
 
 async function saveAcquire(){
+  if(demoGuard())return;
   const name=document.getElementById('aq-name').value.trim();if(!name){alert('Please enter an item name');return;}
   const row={id:eAId||uid(),name,type:document.getElementById('aq-type').value,priority:document.getElementById('aq-priority').value,notes:document.getElementById('aq-notes').value.trim()||null};
   setSyncStatus('syncing','saving…');
@@ -1123,6 +1147,7 @@ async function saveAcquire(){
 }
 
 async function acquireItem(id){
+  if(demoGuard())return;
   const el=document.getElementById('aq-'+id);
   if(el){el.style.opacity='0';el.style.transform='translateX(40px)';el.style.transition='all .3s';}
   setTimeout(async()=>{
@@ -1133,6 +1158,7 @@ async function acquireItem(id){
 }
 
 async function delAcquire(id){
+  if(demoGuard())return;
   await sb.from('acquire').delete().eq('id',id);
   state.acquire=(state.acquire||[]).filter(a=>a.id!==id);
   renderAcquire();
@@ -1172,6 +1198,7 @@ function handlePdfSelect(e){
 }
 
 async function savePattern(){
+  if(demoGuard())return;
   const name=document.getElementById('pat-name').value.trim();
   if(!name){alert('Please enter a pattern name');return;}
   if(!selectedPdfFile){alert('Please choose a PDF file');return;}
@@ -1192,6 +1219,7 @@ async function savePattern(){
 }
 
 async function delPattern(id){
+  if(demoGuard())return;
   if(!confirm('Delete this pattern?'))return;
   const pat=state.patterns.find(p=>p.id===id);
   if(pat&&pat.pdfPath)await sb.storage.from('pdfs').remove([pat.pdfPath]);
@@ -1377,6 +1405,7 @@ document.getElementById('feedback-modal').classList.remove('hidden');
 }
 
 async function saveFeedback(){
+if(demoGuard())return;
 const title=document.getElementById('fb-title').value.trim();
 if(!title){alert('Please enter a title');return;}
 const row={id:eFbId||uid(),title,category:document.getElementById('fb-category').value,priority:document.getElementById('fb-priority').value,notes:document.getElementById('fb-notes').value.trim()||null};
@@ -1391,6 +1420,7 @@ closeModal('feedback-modal');renderFeedback();
 }
 
 async function delFeedback(id){
+if(demoGuard())return;
 if(!confirm('Delete this entry?'))return;
 await sb.from('feedback').delete().eq('id',id);
 state.feedback=(state.feedback||[]).filter(f=>f.id!==id);
@@ -1520,6 +1550,7 @@ function onStashNoteInput(section){
 }
 
 async function saveStashNote(section){
+  if(demoGuard())return;
   clearTimeout(stashNoteDebounce);
   const ta=document.getElementById('stash-note-ta-'+section);
   if(!ta)return;
@@ -1545,6 +1576,24 @@ function toggleDarkMode(){
 function updateDarkBtn(){
   const btn=document.getElementById('dark-mode-btn');
   if(btn) btn.textContent=document.body.classList.contains('dark')?'☀':'🌙';
+}
+
+// -- DEMO MODE --
+function demoGuard(){
+  if(isDemoMode){showToast('Read-only in demo mode');return true;}
+  return false;
+}
+function checkDemoMode(){
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('demo')==='true'){
+    isDemoMode=true;
+    // Show demo badge in header
+    const badge=document.createElement('span');
+    badge.textContent='Demo';
+    badge.style.cssText='font-family:var(--f-body);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:1px;border:1px solid var(--sky);background:var(--sky-light);color:var(--sky);';
+    document.getElementById('sync-indicator').after(badge);
+    setSyncStatus('','read only');
+  }
 }
 
 function setupEventListeners(){
