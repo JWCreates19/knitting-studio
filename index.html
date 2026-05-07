@@ -603,9 +603,6 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
       <div class="list-stack" id="acquire-list"></div>
     </div>
   </div>
-</div>
-
-
 <!-- PALETTES SECTION -->
 <div class="stash-section palette-section">
   <div class="stash-section-header">
@@ -614,33 +611,8 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
   </div>
   <div id="palettes-list" class="list-stack"></div>
 </div>
-
-<!-- PALETTE BUILDER MODAL -->
-<div class="modal-overlay hidden" id="palette-modal">
-  <div class="modal" style="max-width:760px;">
-    <div class="modal-title" id="palette-modal-title">New Palette</div>
-    <div class="palette-builder-wrap">
-      <div>
-        <div style="font-family:var(--f-body);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-light);margin-bottom:8px;">Select yarns from your stash</div>
-        <input class="search-input" type="text" placeholder="Search yarn..." id="palette-yarn-search" oninput="renderPaletteYarnPicker()" style="width:100%;margin-bottom:10px;">
-        <div class="palette-yarn-picker" id="palette-yarn-picker"></div>
-      </div>
-      <div class="palette-panel-box">
-        <div class="palette-panel-heading">Current Palette</div>
-        <div id="palette-swatch-bar-wrap"></div>
-        <div class="palette-selected-list" id="palette-selected-list"></div>
-        <div id="palette-yardage-block"></div>
-        <div class="form-group"><label class="form-label">Palette Name</label><input class="form-input" id="pal-name" type="text" placeholder="e.g. Autumn Walk"></div>
-        <div class="form-group"><label class="form-label">Link to Pattern</label><select class="form-select" id="pal-pattern"><option value="">None</option></select></div>
-        <div class="form-group"><label class="form-label">Link to Project</label><select class="form-select" id="pal-project" onchange="updatePalettePanel()"><option value="">None</option></select></div>
-        <div class="modal-footer" style="padding:0;margin:0;border:none;">
-          <button class="btn-cancel" onclick="closeModal('palette-modal')">Cancel</button>
-          <button class="btn-save" onclick="savePalette()">Save Palette</button>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
+
 
 <!-- PATTERNS -->
 
@@ -846,6 +818,33 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
     <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
       <button class="btn-cancel" onclick="closeLinkPrompt()">Cancel</button>
       <button class="btn-save" onclick="confirmLinkChoice()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- PALETTE BUILDER MODAL -->
+<div class="modal-overlay hidden" id="palette-modal">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-title" id="palette-modal-title">New Palette</div>
+    <div class="palette-builder-wrap">
+      <div>
+        <div style="font-family:var(--f-body);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-light);margin-bottom:8px;">Select yarns from your stash</div>
+        <input class="search-input" type="text" placeholder="Search yarn..." id="palette-yarn-search" oninput="renderPaletteYarnPicker()" style="width:100%;margin-bottom:10px;">
+        <div class="palette-yarn-picker" id="palette-yarn-picker"></div>
+      </div>
+      <div class="palette-panel-box">
+        <div class="palette-panel-heading">Current Palette</div>
+        <div id="palette-swatch-bar-wrap"></div>
+        <div class="palette-selected-list" id="palette-selected-list"></div>
+        <div id="palette-yardage-block"></div>
+        <div class="form-group"><label class="form-label">Palette Name</label><input class="form-input" id="pal-name" type="text" placeholder="e.g. Autumn Walk"></div>
+        <div class="form-group"><label class="form-label">Link to Pattern</label><select class="form-select" id="pal-pattern"><option value="">None</option></select></div>
+        <div class="form-group"><label class="form-label">Link to Project</label><select class="form-select" id="pal-project" onchange="updatePalettePanel()"><option value="">None</option></select></div>
+        <div class="modal-footer" style="padding:0;margin:0;border:none;">
+          <button class="btn-cancel" onclick="closeModal('palette-modal')">Cancel</button>
+          <button class="btn-save" onclick="savePalette()">Save Palette</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1909,7 +1908,7 @@ function renderPalettes(){
 }
 
 function openPaletteBuilder(id){
-  if(isDemo()){showToast('Read-only in demo mode');return;}
+  if(demoGuard())return;
   ePalId=id||null;
   const pal=id?state.palettes.find(p=>p.id===id):null;
   palSelectedYarnIds=pal?(pal.yarn_ids||[]).slice():[];
@@ -1985,7 +1984,7 @@ function updatePalettePanel(){
 }
 
 async function savePalette(){
-  if(isDemo()){showToast('Read-only in demo mode');return;}
+  if(demoGuard())return;
   const name=document.getElementById('pal-name').value.trim();
   if(!name){alert('Please enter a palette name');return;}
   const linkedProjId=document.getElementById('pal-project').value||null;
@@ -2044,7 +2043,7 @@ function closeLinkPrompt(){
 }
 
 async function delPalette(id){
-  if(isDemo()){showToast('Read-only in demo mode');return;}
+  if(demoGuard())return;
   if(!confirm('Delete this palette?'))return;
   await sb.from('palettes').delete().eq('id',id);
   state.palettes=state.palettes.filter(p=>p.id!==id);
@@ -2095,14 +2094,14 @@ function renderMoodboards(){
 }
 
 function openMoodboardModal(){
-  if(isDemo()){showToast('Read-only in demo mode');return;}
+  if(demoGuard())return;
   document.getElementById('mb-modal-name').value='';
   document.getElementById('moodboard-modal-title').textContent='New Board';
   document.getElementById('moodboard-modal').classList.remove('hidden');
 }
 
 async function saveMoodboard(){
-  if(isDemo()){showToast('Read-only in demo mode');return;}
+  if(demoGuard())return;
   const name=document.getElementById('mb-modal-name').value.trim();
   if(!name){alert('Please enter a board name');return;}
   const row={id:uid(),name,notes:'',images:[],sketch_data:null};
@@ -2117,7 +2116,7 @@ async function saveMoodboard(){
 }
 
 async function delMoodboard(id){
-  if(isDemo()){showToast('Read-only in demo mode');return;}
+  if(demoGuard())return;
   if(!confirm('Delete this board?'))return;
   const mb=state.moodboards.find(m=>m.id===id);
   if(mb&&mb.images){for(const img of mb.images){if(img.path)await sb.storage.from('moodboard-images').remove([img.path]);}}
@@ -2157,7 +2156,7 @@ function renderMbImages(){
 }
 
 async function handleMoodboardImage(e){
-  if(isDemo()){showToast('Read-only in demo mode');return;}
+  if(demoGuard())return;
   const f=e.target.files[0];if(!f)return;
   setSyncStatus('syncing','uploading...');
   const path='moodboard-images/'+uid()+'-'+f.name.replace(/\s/g,'_');
@@ -2173,7 +2172,7 @@ async function handleMoodboardImage(e){
 }
 
 async function removeMbImage(idx){
-  if(isDemo()){showToast('Read-only in demo mode');return;}
+  if(demoGuard())return;
   const mb=state.moodboards.find(m=>m.id===curMbId);if(!mb)return;
   const img=mb.images[idx];
   if(img.path)await sb.storage.from('moodboard-images').remove([img.path]);
@@ -2183,7 +2182,7 @@ async function removeMbImage(idx){
 }
 
 async function saveMoodboardNotes(){
-  if(isDemo()){showToast('Read-only in demo mode');return;}
+  if(demoGuard())return;
   const mb=state.moodboards.find(m=>m.id===curMbId);if(!mb)return;
   mb.notes=document.getElementById('mb-notes-ta').value;
   await sb.from('moodboards').update({notes:mb.notes}).eq('id',curMbId);
@@ -2239,7 +2238,7 @@ function clearMbCanvas(){
 }
 
 async function saveMbSketch(){
-  if(isDemo()){showToast('Read-only in demo mode');return;}
+  if(demoGuard())return;
   const canvas=document.getElementById('mb-sketch-canvas');
   const data=canvas.toDataURL('image/png');
   const mb=state.moodboards.find(m=>m.id===curMbId);if(!mb)return;
