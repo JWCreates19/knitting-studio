@@ -584,6 +584,69 @@ if lib_ver and worker_ver:
     else:
         fail(f"PDF.js version mismatch: lib={lib_ver.group(1)} worker={worker_ver.group(1)}")
 
+
+# ==============================================================
+section("14. Structural Correctness — Modal & Section Nesting")
+# ==============================================================
+
+import re as _re
+
+def find_page_close(h, open_idx):
+    """Find closing </div> index for a page div using recursive matching."""
+    depth = 0
+    i = open_idx
+    while i < len(h):
+        if h[i:i+4] == '<div':
+            depth += 1; i += 4
+        elif h[i:i+6] == '</div>':
+            depth -= 1
+            if depth == 0: return i
+            i += 6
+        else:
+            i += 1
+    return len(h)
+
+all_page_divs = [(m.start(), m.group(0)) for m in _re.finditer(r'<div id="page-[^"]+?"', html)]
+
+# Key modals must NOT be nested inside any page div
+top_level_modals = [
+    'palette-modal', 'moodboard-modal', 'link-prompt-overlay',
+    'moodboard-viewer', 'proj-modal', 'yarn-modal', 'needle-modal',
+    'acquire-modal', 'pat-modal', 'feedback-modal',
+]
+
+for mid in top_level_modals:
+    el_idx = html.find(f'id="{mid}"')
+    if el_idx == -1:
+        warn(f"#{mid} not found in HTML"); continue
+    nested = False
+    for page_start, _ in all_page_divs:
+        page_close = find_page_close(html, page_start)
+        if page_start < el_idx < page_close:
+            fail(f"#{mid} NESTED inside page div — will be hidden when page is hidden")
+            nested = True; break
+    if not nested:
+        ok(f"#{mid} is correctly at top level")
+
+# Palette section must be INSIDE page-stash (not floating between pages)
+pal_idx = html.find('id="palettes-list"')
+stash_open = html.find('<div id="page-stash"')
+stash_close = find_page_close(html, stash_open) if stash_open != -1 else -1
+if pal_idx != -1 and stash_open != -1:
+    if stash_open < pal_idx < stash_close:
+        ok("Colour Palettes section is inside #page-stash")
+    else:
+        fail("Colour Palettes section is NOT inside #page-stash — will render on all tabs")
+else:
+    fail("Could not verify palette section placement")
+
+# isDemo() must not be called (live app uses demoGuard())
+isDemo_calls = js_raw.count('isDemo()')
+if isDemo_calls == 0:
+    ok("No isDemo() calls — demo guard uses demoGuard() correctly")
+else:
+    fail(f"isDemo() called {isDemo_calls} times but is not defined — use demoGuard() instead")
+
 # ==============================================================
 # SUMMARY
 # ==============================================================
