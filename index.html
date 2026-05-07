@@ -404,6 +404,95 @@ body.dark .stash-notes-panel{background:#1e1b18;border-color:#2e2926;}
 body.dark .stash-notes-ta{color:var(--ink);}
 body.dark .stash-notes-header{border-color:#2e2926;}
 body.dark .stash-notes-footer{border-color:#2e2926;}
+
+/* PALETTE BUILDER */
+.palette-section{margin-bottom:32px;}
+.palette-builder-wrap{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;}
+@media(max-width:700px){.palette-builder-wrap{grid-template-columns:1fr;}}
+.palette-yarn-picker{display:flex;flex-direction:column;gap:8px;max-height:480px;overflow-y:auto;padding-right:4px;}
+.palette-yarn-row{background:var(--parchment);border:1px solid var(--border);border-radius:2px;padding:10px 14px;display:flex;gap:12px;align-items:center;box-shadow:2px 2px 0 var(--border-soft);cursor:pointer;transition:all .15s;}
+.palette-yarn-row:hover{border-color:var(--sage);}
+.palette-yarn-row.pal-selected{border-color:var(--sage-dark);background:var(--sage-light);box-shadow:2px 2px 0 var(--sage);}
+.palette-yarn-swatch{width:30px;height:30px;border-radius:50%;border:1px solid rgba(61,50,34,.2);flex-shrink:0;}
+.palette-yarn-check{width:18px;height:18px;border:1.5px solid var(--border);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-left:auto;font-size:10px;color:transparent;transition:all .15s;}
+.palette-yarn-row.pal-selected .palette-yarn-check{background:var(--sage-dark);border-color:var(--sage-dark);color:white;}
+.palette-panel-box{background:var(--parchment);border:1px solid var(--border);border-radius:2px;box-shadow:2px 2px 0 var(--border-soft);padding:18px;position:sticky;top:80px;}
+.palette-panel-heading{font-family:var(--f-display);font-size:18px;font-weight:300;font-style:italic;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border-soft);}
+.palette-swatch-bar{display:flex;height:56px;border-radius:2px;overflow:hidden;border:1px solid var(--border);margin-bottom:14px;}
+.palette-swatch-bar-empty{height:56px;border:1px dashed var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:var(--f-body);font-size:11px;color:var(--ink-faint);margin-bottom:14px;}
+.palette-swatch-seg{flex:1;transition:flex .25s ease;}
+.palette-selected-list{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;min-height:24px;}
+.palette-sel-item{display:flex;align-items:center;gap:7px;font-family:var(--f-body);font-size:11px;color:var(--ink-mid);}
+.palette-sel-dot{width:11px;height:11px;border-radius:50%;border:1px solid rgba(61,50,34,.15);flex-shrink:0;}
+.palette-yardage-block{background:var(--cream);border:1px solid var(--border-soft);border-radius:2px;padding:9px 11px;margin-bottom:12px;}
+.palette-yardage-title{font-family:var(--f-body);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-light);margin-bottom:7px;}
+.palette-yardage-bar-bg{background:var(--parchment-d);height:4px;border-radius:2px;overflow:hidden;margin-bottom:4px;}
+.palette-yardage-bar-fill{height:100%;background:var(--sage-dark);border-radius:2px;transition:width .3s;}
+.palette-yardage-bar-fill.over{background:var(--terra);}
+.palette-yardage-nums{display:flex;justify-content:space-between;font-family:var(--f-body);font-size:10px;color:var(--ink-light);}
+.palette-yardage-warn{font-family:var(--f-body);font-size:10px;color:var(--terra);margin-top:3px;}
+.palette-card-strip{display:flex;height:24px;}
+.palette-card-strip-seg{flex:1;}
+.pal-card{background:var(--parchment);border:1px solid var(--border);border-radius:2px;box-shadow:2px 2px 0 var(--border-soft);overflow:hidden;margin-bottom:10px;transition:transform .15s;}
+.pal-card:hover{transform:translateY(-1px);}
+.pal-card-body{padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.pal-card-name{font-family:var(--f-display);font-size:15px;font-weight:400;font-style:italic;color:var(--ink);flex:1;}
+.pal-card-meta{font-family:var(--f-body);font-size:10px;color:var(--ink-light);}
+.linked-badge{font-family:var(--f-body);font-size:9px;font-weight:400;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:1px;border:1px solid var(--lav);background:var(--lav-light);color:#4a3a7a;}
+
+/* LINK PROMPT MODAL */
+.link-prompt-overlay{position:fixed;inset:0;background:rgba(61,50,34,.4);z-index:1500;display:flex;align-items:center;justify-content:center;padding:16px;}
+.link-prompt-overlay.hidden{display:none;}
+.link-prompt-box{background:var(--parchment);border:1px solid var(--border);border-radius:2px;box-shadow:6px 6px 0 var(--border);width:100%;max-width:440px;padding:24px;}
+.link-prompt-title{font-family:var(--f-display);font-size:22px;font-weight:300;font-style:italic;color:var(--ink);margin-bottom:6px;}
+.link-prompt-sub{font-family:var(--f-body);font-size:12px;color:var(--ink-light);margin-bottom:18px;line-height:1.6;}
+.link-choice-opt{border:1px solid var(--border);border-radius:2px;padding:13px;margin-bottom:9px;cursor:pointer;transition:all .15s;background:var(--cream);}
+.link-choice-opt:hover,.link-choice-opt.chosen{border-color:var(--sage-dark);background:var(--sage-light);}
+.link-choice-opt-title{font-family:var(--f-body);font-size:10px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-mid);margin-bottom:3px;}
+.link-choice-opt-desc{font-family:var(--f-body);font-size:12px;color:var(--ink-light);line-height:1.5;}
+
+/* MOOD BOARD */
+#moodboard-viewer{position:fixed;inset:0;background:#2a2016;z-index:2000;display:flex;flex-direction:column;touch-action:none;}
+#moodboard-viewer.hidden{display:none;}
+.mb-toolbar{background:#1e160e;border-bottom:1px solid #5a4a2a;padding:8px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+.mb-viewer-title{font-family:var(--f-display);font-size:18px;font-weight:300;font-style:italic;color:#ede0cc;flex:1;min-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mb-btn{font-family:var(--f-body);font-size:10px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:5px 10px;border:1px solid #5a4a2a;background:transparent;color:#c8a882;cursor:pointer;border-radius:1px;white-space:nowrap;}
+.mb-btn:hover{background:#2a2016;}
+.mb-body{flex:1;display:flex;overflow:hidden;}
+.mb-content-area{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:18px;}
+.mb-section-lbl{font-family:var(--f-body);font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:#6a5a40;margin-bottom:8px;}
+.mb-images-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
+.mb-img-wrap{position:relative;border-radius:2px;overflow:hidden;border:1px solid #5a4a2a;}
+.mb-img-wrap img{width:100%;height:100px;object-fit:cover;display:block;}
+.mb-img-del{position:absolute;top:4px;right:4px;width:20px;height:20px;background:rgba(184,122,114,.85);border:none;border-radius:50%;color:white;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.mb-add-img-btn{border:1px dashed #4a3a22;border-radius:2px;height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;color:#6a5a40;transition:all .15s;}
+.mb-add-img-btn:hover{border-color:#8a7060;color:#c8a882;}
+.mb-notes-ta{width:100%;background:#2a2016;border:1px solid #4a3a22;color:#e0d0b8;font-family:var(--f-body);font-size:13px;font-weight:300;padding:12px;border-radius:2px;resize:vertical;min-height:90px;line-height:1.6;outline:none;}
+.mb-notes-ta:focus{border-color:#8a7060;}
+.mb-sketch-panel{width:300px;background:#1e160e;border-left:1px solid #5a4a2a;display:flex;flex-direction:column;flex-shrink:0;}
+.mb-sketch-toolbar{padding:10px 12px;border-bottom:1px solid #3a2a18;display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+.mb-sketch-lbl{font-family:var(--f-body);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#6a5a40;width:100%;margin-bottom:3px;}
+.mb-brush-btn{width:26px;height:26px;border:1px solid #4a3a22;background:transparent;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.mb-brush-btn.active{border-color:var(--sand);background:#2a2016;}
+.mb-brush-dot{background:#c8a882;border-radius:50%;}
+.mb-color-btn{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border-color .15s;flex-shrink:0;}
+.mb-color-btn.active{border-color:#c8a882;}
+.mb-canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:10px;}
+#mb-sketch-canvas{background:#1e160e;border:1px solid #3a2a18;border-radius:2px;cursor:crosshair;touch-action:none;display:block;max-width:100%;max-height:100%;}
+.mb-canvas-actions{padding:8px 10px;border-top:1px solid #3a2a18;display:flex;gap:6px;}
+.mb-canvas-act-btn{font-family:var(--f-body);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:5px 8px;border:1px solid #4a3a22;background:transparent;color:#8a7060;cursor:pointer;border-radius:1px;flex:1;}
+.mb-canvas-act-btn:hover{color:var(--sand);border-color:#8a7060;}
+.mb-card{background:var(--parchment);border:1px solid var(--border);border-radius:2px;box-shadow:2px 2px 0 var(--border-soft);overflow:hidden;transition:transform .15s;cursor:pointer;}
+.mb-card:hover{transform:translateY(-2px);box-shadow:4px 4px 0 var(--border);}
+.mb-card-cover{height:120px;background:var(--parchment-d);overflow:hidden;display:flex;flex-wrap:wrap;}
+.mb-card-cover img{width:50%;height:100%;object-fit:cover;flex-shrink:0;}
+.mb-card-cover img:only-child{width:100%;}
+.mb-card-cover-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-style:italic;font-size:13px;color:var(--ink-faint);}
+.mb-card-body{padding:12px 14px;}
+.mb-card-title{font-family:var(--f-display);font-size:16px;font-weight:400;font-style:italic;color:var(--ink);margin-bottom:3px;}
+.mb-card-meta{font-family:var(--f-body);font-size:10px;color:var(--ink-light);}
+.mb-card-footer{border-top:1px solid var(--border-soft);padding:8px 14px;display:flex;gap:6px;}
+
 </style>
 
 </head>
@@ -432,6 +521,7 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
   <button class="nav-tab active" onclick="switchTab('projects')">Projects</button>
   <button class="nav-tab" onclick="switchTab('stash')">The Stash</button>
   <button class="nav-tab" onclick="switchTab('patterns')">Patterns</button>
+  <button class="nav-tab" onclick="switchTab('moodboard')">Mood Board</button>
   <button class="nav-tab" onclick="switchTab('feedback')">Ideas & Feedback</button>
 </nav>
 
@@ -511,6 +601,43 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
     </div>
     <div id="acquire-section-body">
       <div class="list-stack" id="acquire-list"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- PALETTES SECTION -->
+<div class="stash-section palette-section">
+  <div class="stash-section-header">
+    <div class="stash-section-title">Colour Palettes</div>
+    <button class="btn-add" onclick="openPaletteBuilder()">+ New Palette</button>
+  </div>
+  <div id="palettes-list" class="list-stack"></div>
+</div>
+
+<!-- PALETTE BUILDER MODAL -->
+<div class="modal-overlay hidden" id="palette-modal">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-title" id="palette-modal-title">New Palette</div>
+    <div class="palette-builder-wrap">
+      <div>
+        <div style="font-family:var(--f-body);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-light);margin-bottom:8px;">Select yarns from your stash</div>
+        <input class="search-input" type="text" placeholder="Search yarn..." id="palette-yarn-search" oninput="renderPaletteYarnPicker()" style="width:100%;margin-bottom:10px;">
+        <div class="palette-yarn-picker" id="palette-yarn-picker"></div>
+      </div>
+      <div class="palette-panel-box">
+        <div class="palette-panel-heading">Current Palette</div>
+        <div id="palette-swatch-bar-wrap"></div>
+        <div class="palette-selected-list" id="palette-selected-list"></div>
+        <div id="palette-yardage-block"></div>
+        <div class="form-group"><label class="form-label">Palette Name</label><input class="form-input" id="pal-name" type="text" placeholder="e.g. Autumn Walk"></div>
+        <div class="form-group"><label class="form-label">Link to Pattern</label><select class="form-select" id="pal-pattern"><option value="">None</option></select></div>
+        <div class="form-group"><label class="form-label">Link to Project</label><select class="form-select" id="pal-project" onchange="updatePalettePanel()"><option value="">None</option></select></div>
+        <div class="modal-footer" style="padding:0;margin:0;border:none;">
+          <button class="btn-cancel" onclick="closeModal('palette-modal')">Cancel</button>
+          <button class="btn-save" onclick="savePalette()">Save Palette</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -634,6 +761,92 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
       <input type="file" id="pat-pdf-input" accept="application/pdf" class="hidden" onchange="handlePdfSelect(event)">
     </div>
     <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('pat-modal')">Cancel</button><button class="btn-save" onclick="savePattern()">Save Pattern</button></div>
+  </div>
+</div>
+
+
+<!-- MOOD BOARD PAGE -->
+<div id="page-moodboard" class="page hidden">
+  <div class="section-header">
+    <div class="section-title">Mood Board</div>
+    <button class="btn-add" onclick="openMoodboardModal()">+ New Board</button>
+  </div>
+  <div class="cards-grid" id="moodboard-grid"></div>
+</div>
+
+<!-- MOOD BOARD VIEWER (full-screen) -->
+<div id="moodboard-viewer" class="hidden">
+  <div class="mb-toolbar">
+    <button class="mb-btn" onclick="closeMoodboardViewer()">X Close</button>
+    <div class="mb-viewer-title" id="mb-viewer-title">Board</div>
+    <button class="mb-btn" onclick="document.getElementById('mb-img-input').click()">+ Image</button>
+    <input type="file" id="mb-img-input" accept="image/*" class="hidden" onchange="handleMoodboardImage(event)">
+    <button class="mb-btn" onclick="saveMoodboardNotes()">Save Notes</button>
+  </div>
+  <div class="mb-body">
+    <div class="mb-content-area" id="mb-content-area">
+      <div>
+        <div class="mb-section-lbl">Images</div>
+        <div class="mb-images-grid" id="mb-images-grid"></div>
+      </div>
+      <div>
+        <div class="mb-section-lbl">Notes</div>
+        <textarea class="mb-notes-ta" id="mb-notes-ta" placeholder="Ideas, colour notes, inspiration..."></textarea>
+      </div>
+    </div>
+    <div class="mb-sketch-panel">
+      <div class="mb-sketch-toolbar">
+        <div class="mb-sketch-lbl">Sketch</div>
+        <button class="mb-brush-btn active" id="mb-brush-0" onclick="setMbBrush(0)" title="Fine"><div class="mb-brush-dot" style="width:3px;height:3px;"></div></button>
+        <button class="mb-brush-btn" id="mb-brush-1" onclick="setMbBrush(1)" title="Medium"><div class="mb-brush-dot" style="width:6px;height:6px;"></div></button>
+        <button class="mb-brush-btn" id="mb-brush-2" onclick="setMbBrush(2)" title="Thick"><div class="mb-brush-dot" style="width:11px;height:11px;"></div></button>
+        <button class="mb-brush-btn" id="mb-brush-3" onclick="setMbBrush(3)" title="Eraser" style="font-size:12px;color:#8a7060;">E</button>
+        <div class="mb-color-btn active" style="background:#c8a882;" onclick="setMbColor(this,'#c8a882')"></div>
+        <div class="mb-color-btn" style="background:#8fac78;" onclick="setMbColor(this,'#8fac78')"></div>
+        <div class="mb-color-btn" style="background:#b87a72;" onclick="setMbColor(this,'#b87a72')"></div>
+        <div class="mb-color-btn" style="background:#7a9eb5;" onclick="setMbColor(this,'#7a9eb5')"></div>
+        <div class="mb-color-btn" style="background:#9b8ec4;" onclick="setMbColor(this,'#9b8ec4')"></div>
+        <div class="mb-color-btn" style="background:#fffdf7;" onclick="setMbColor(this,'#fffdf7')"></div>
+        <div class="mb-color-btn" style="background:#3d3222;" onclick="setMbColor(this,'#3d3222')"></div>
+        <input type="color" id="mb-custom-color" value="#c8a882" onchange="setMbColorHex(this.value)" style="width:22px;height:22px;border-radius:50%;border:2px solid #4a3a22;cursor:pointer;padding:0;background:none;" title="Custom color">
+      </div>
+      <div class="mb-canvas-wrap" id="mb-canvas-wrap">
+        <canvas id="mb-sketch-canvas"></canvas>
+      </div>
+      <div class="mb-canvas-actions">
+        <button class="mb-canvas-act-btn" onclick="clearMbCanvas()">Clear</button>
+        <button class="mb-canvas-act-btn" onclick="saveMbSketch()">Save Sketch</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MOODBOARD NAME MODAL -->
+<div class="modal-overlay hidden" id="moodboard-modal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-title" id="moodboard-modal-title">New Board</div>
+    <div class="form-group"><label class="form-label">Board Name</label><input class="form-input" id="mb-modal-name" type="text" placeholder="e.g. Winter Colorwork Ideas"></div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('moodboard-modal')">Cancel</button><button class="btn-save" onclick="saveMoodboard()">Create Board</button></div>
+  </div>
+</div>
+
+<!-- LINK PROMPT -->
+<div class="link-prompt-overlay hidden" id="link-prompt-overlay">
+  <div class="link-prompt-box">
+    <div class="link-prompt-title">Link Palette to Project</div>
+    <div class="link-prompt-sub" id="link-prompt-sub"></div>
+    <div class="link-choice-opt" id="link-choice-keep" onclick="selectLinkChoice('keep')">
+      <div class="link-choice-opt-title">Keep existing yarn + add palette</div>
+      <div class="link-choice-opt-desc">Your current yarn selection stays. The palette is linked for reference and yardage tracking.</div>
+    </div>
+    <div class="link-choice-opt" id="link-choice-replace" onclick="selectLinkChoice('replace')">
+      <div class="link-choice-opt-title">Replace with palette yarns</div>
+      <div class="link-choice-opt-desc">Your current yarn selection is replaced with the yarns in this palette.</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
+      <button class="btn-cancel" onclick="closeLinkPrompt()">Cancel</button>
+      <button class="btn-save" onclick="confirmLinkChoice()">Confirm</button>
+    </div>
   </div>
 </div>
 
@@ -780,7 +993,7 @@ async function init(){
 }
 
 async function loadAll(){
-  const [proj,yarn,needles,acquire,patterns,feedback,notes]=await Promise.all([
+  const [proj,yarn,needles,acquire,patterns,feedback,notes,palettes,moodboards]=await Promise.all([
     sb.from('projects').select('*').order('created_at',{ascending:false}),
     sb.from('yarn').select('*').order('created_at',{ascending:false}),
     sb.from('needles').select('*').order('created_at',{ascending:false}),
@@ -788,6 +1001,8 @@ async function loadAll(){
     sb.from('patterns').select('*').order('created_at',{ascending:false}),
     sb.from('feedback').select('*').order('created_at',{ascending:false}),
     sb.from('stash_notes').select('*'),
+    sb.from('palettes').select('*').order('created_at',{ascending:false}),
+    sb.from('moodboards').select('*').order('created_at',{ascending:false}),
   ]);
   state.projects=(proj.data||[]).map(dbToProject);
   state.yarn=(yarn.data||[]).map(dbToYarn);
@@ -797,6 +1012,8 @@ async function loadAll(){
   state.feedback=feedback.data||[];
   state.stashNotes={yarn:'',needles:''};
   (notes.data||[]).forEach(n=>{if(n.section==='yarn'||n.section==='needles')state.stashNotes[n.section]=n.content||'';});
+  state.palettes=palettes.data||[];
+  state.moodboards=moodboards.data||[];
 }
 
 // DB row converters
@@ -811,15 +1028,16 @@ function dbToPattern(r){
 }
 
 function switchTab(t){
-  document.querySelectorAll('.nav-tab').forEach((el,i)=>el.classList.toggle('active',['projects','stash','patterns','feedback'][i]===t));
+  document.querySelectorAll('.nav-tab').forEach((el,i)=>el.classList.toggle('active',['projects','stash','patterns','moodboard','feedback'][i]===t));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const pageEl=document.getElementById('page-'+t);
   pageEl.classList.remove('hidden');
   pageEl.classList.add('active');
   if(t==='projects')renderProjects();
-  if(t==='stash'){renderYarn();renderNeedles();renderAcquire();}
+  if(t==='stash'){renderYarn();renderNeedles();renderAcquire();renderPalettes();}
   if(t==='patterns')renderPatterns();
   if(t==='feedback')renderFeedback();
+  if(t==='moodboard')renderMoodboards();
 }
 
 const SL={'not-started':'Not Started','in-progress':'In Progress','completed':'Completed','on-hold':'On Hold'};
@@ -1653,7 +1871,409 @@ document.addEventListener('mousemove',e=>{if(!drag)return;const mx=document.getE
 document.addEventListener('touchmove',e=>{if(!drag)return;const mx=document.getElementById('pdf-canvas').height-hlEl.offsetHeight;hlEl.style.top=Math.max(0,Math.min(mx,dT+e.touches[0].clientY-dY))+'px';},{passive:true});
 document.addEventListener('mouseup',()=>{if(drag){drag=false;saveHlPos();}});
 document.addEventListener('touchend',()=>{if(drag){drag=false;saveHlPos();}});
+  setupMbCanvasListeners();
+}
 
+
+// -- PALETTE BUILDER --
+let ePalId=null;
+let palSelectedYarnIds=[];
+let linkPromptChoice=null;
+let linkPromptPalId=null;
+let linkPromptProjId=null;
+
+function renderPalettes(){
+  const el=document.getElementById('palettes-list');
+  if(!el)return;
+  if(!state.palettes||!state.palettes.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-title">No palettes yet</div><div class="empty-sub">Build your first colour palette above</div></div>';
+    return;
+  }
+  el.innerHTML=state.palettes.map(pal=>{
+    const yarns=(pal.yarn_ids||[]).map(id=>state.yarn.find(y=>y.id===id)).filter(Boolean);
+    const strip=yarns.map(y=>`<div class="palette-card-strip-seg" style="background:${y.colour}"></div>`).join('');
+    const totalYds=yarns.reduce((s,y)=>(s+(y.yardage||0)*(y.skeins||1)),0);
+    const linkedPat=pal.linked_pattern_id?state.patterns.find(p=>p.id===pal.linked_pattern_id):null;
+    const linkedProj=pal.linked_project_id?state.projects.find(p=>p.id===pal.linked_project_id):null;
+    const linkBadge=linkedPat?`<span class="linked-badge">Pattern: ${esc(linkedPat.name)}</span>`:linkedProj?`<span class="linked-badge">Project: ${esc(linkedProj.name)}</span>`:'';
+    return `<div class="pal-card">
+      <div class="palette-card-strip">${strip||'<div style="flex:1;background:var(--parchment-d)"></div>'}</div>
+      <div class="pal-card-body">
+        <div><div class="pal-card-name">${esc(pal.name)}</div><div class="pal-card-meta">${yarns.length} yarn${yarns.length!==1?'s':''} &middot; ${totalYds} yds total</div></div>
+        ${linkBadge}
+        <button class="btn-sm" onclick="openPaletteBuilder('${pal.id}')">Edit</button>
+        <button class="btn-sm danger" onclick="delPalette('${pal.id}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openPaletteBuilder(id){
+  if(isDemo()){showToast('Read-only in demo mode');return;}
+  ePalId=id||null;
+  const pal=id?state.palettes.find(p=>p.id===id):null;
+  palSelectedYarnIds=pal?(pal.yarn_ids||[]).slice():[];
+  document.getElementById('palette-modal-title').textContent=pal?'Edit Palette':'New Palette';
+  document.getElementById('pal-name').value=pal?pal.name:'';
+  document.getElementById('palette-yarn-search').value='';
+  const patSel=document.getElementById('pal-pattern');
+  patSel.innerHTML='<option value="">None</option>'+state.patterns.map(pt=>`<option value="${pt.id}"${pal&&pal.linked_pattern_id===pt.id?' selected':''}>${esc(pt.name)}</option>`).join('');
+  const projSel=document.getElementById('pal-project');
+  projSel.innerHTML='<option value="">None</option>'+state.projects.map(pr=>`<option value="${pr.id}"${pal&&pal.linked_project_id===pr.id?' selected':''}>${esc(pr.name)}</option>`).join('');
+  renderPaletteYarnPicker();
+  updatePalettePanel();
+  document.getElementById('palette-modal').classList.remove('hidden');
+}
+
+function renderPaletteYarnPicker(){
+  const q=(document.getElementById('palette-yarn-search').value||'').toLowerCase();
+  const el=document.getElementById('palette-yarn-picker');
+  const list=state.yarn.filter(y=>!q||y.name.toLowerCase().includes(q)||(y.brand||'').toLowerCase().includes(q));
+  if(!list.length){el.innerHTML='<div style="font-size:12px;color:var(--ink-faint);padding:8px">No yarn in stash</div>';return;}
+  el.innerHTML=list.map(y=>{
+    const sel=palSelectedYarnIds.includes(y.id);
+    const total=(y.yardage||0)*(y.skeins||1);
+    return `<div class="palette-yarn-row${sel?' pal-selected':''}" onclick="togglePaletteYarn('${y.id}')">
+      <div class="palette-yarn-swatch" style="background:${y.colour}"></div>
+      <div style="flex:1">
+        <div style="font-family:var(--f-display);font-size:14px;font-weight:400;color:var(--ink)">${esc(y.name)}</div>
+        <div style="font-family:var(--f-body);font-size:10px;color:var(--ink-light)">${y.weight||''} &middot; ${total?total+' yds':''}</div>
+      </div>
+      <div class="palette-yarn-check">${sel?'&check;':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function togglePaletteYarn(id){
+  const idx=palSelectedYarnIds.indexOf(id);
+  if(idx>=0)palSelectedYarnIds.splice(idx,1);
+  else palSelectedYarnIds.push(id);
+  renderPaletteYarnPicker();
+  updatePalettePanel();
+}
+
+function updatePalettePanel(){
+  const yarns=palSelectedYarnIds.map(id=>state.yarn.find(y=>y.id===id)).filter(Boolean);
+  const barWrap=document.getElementById('palette-swatch-bar-wrap');
+  if(!barWrap)return;
+  if(!yarns.length){
+    barWrap.innerHTML='<div class="palette-swatch-bar-empty">Select yarns to build palette</div>';
+  } else {
+    barWrap.innerHTML='<div class="palette-swatch-bar">'+yarns.map(y=>`<div class="palette-swatch-seg" style="background:${y.colour}" title="${esc(y.name)}"></div>`).join('')+'</div>';
+  }
+  const selList=document.getElementById('palette-selected-list');
+  selList.innerHTML=yarns.map(y=>{
+    const total=(y.yardage||0)*(y.skeins||1);
+    return `<div class="palette-sel-item"><div class="palette-sel-dot" style="background:${y.colour}"></div><span>${esc(y.name)} &middot; ${total} yds</span></div>`;
+  }).join('');
+  const projId=document.getElementById('pal-project').value;
+  const proj=projId?state.projects.find(p=>p.id===projId):null;
+  const yardBlock=document.getElementById('palette-yardage-block');
+  if(proj&&proj.targetYards&&yarns.length){
+    const totalYds=yarns.reduce((s,y)=>(s+(y.yardage||0)*(y.skeins||1)),0);
+    const pct=Math.min(100,Math.round((totalYds/proj.targetYards)*100));
+    const short=proj.targetYards-totalYds;
+    yardBlock.innerHTML=`<div class="palette-yardage-block">
+      <div class="palette-yardage-title">Yardage vs Target</div>
+      <div class="palette-yardage-bar-bg"><div class="palette-yardage-bar-fill${short>0?' over':''}" style="width:${pct}%"></div></div>
+      <div class="palette-yardage-nums"><span>${totalYds} yds in palette</span><span>${proj.targetYards} yds needed</span></div>
+      ${short>0?`<div class="palette-yardage-warn">Warning: ${short} yds short of target</div>`:''}
+    </div>`;
+  } else {
+    yardBlock.innerHTML='';
+  }
+}
+
+async function savePalette(){
+  if(isDemo()){showToast('Read-only in demo mode');return;}
+  const name=document.getElementById('pal-name').value.trim();
+  if(!name){alert('Please enter a palette name');return;}
+  const linkedProjId=document.getElementById('pal-project').value||null;
+  const linkedPatId=document.getElementById('pal-pattern').value||null;
+  if(linkedProjId&&!ePalId){
+    const proj=state.projects.find(p=>p.id===linkedProjId);
+    if(proj&&(proj.yarnIds||[]).length>0&&palSelectedYarnIds.length>0){
+      linkPromptPalId={name,yarn_ids:palSelectedYarnIds,linked_pattern_id:linkedPatId,linked_project_id:linkedProjId};
+      linkPromptProjId=linkedProjId;
+      document.getElementById('link-prompt-sub').innerHTML=`<em>${esc(proj.name)}</em> already has yarn selected. How would you like to apply <em>${esc(name)}</em>?`;
+      document.getElementById('link-choice-keep').classList.remove('chosen');
+      document.getElementById('link-choice-replace').classList.remove('chosen');
+      linkPromptChoice=null;
+      document.getElementById('link-prompt-overlay').classList.remove('hidden');
+      return;
+    }
+  }
+  await doSavePalette(name,palSelectedYarnIds,linkedPatId,linkedProjId,null);
+}
+
+async function doSavePalette(name,yarnIds,linkedPatId,linkedProjId,yarnOverride){
+  const row={id:ePalId||uid(),name,yarn_ids:yarnIds,linked_pattern_id:linkedPatId||null,linked_project_id:linkedProjId||null};
+  setSyncStatus('syncing','saving...');
+  const{error}=await sb.from('palettes').upsert(row);
+  if(error){showToast('Save failed: '+error.message);setSyncStatus('error','save error');return;}
+  if(yarnOverride==='replace'&&linkedProjId){
+    const proj=state.projects.find(p=>p.id===linkedProjId);
+    if(proj){
+      proj.yarnIds=yarnIds;
+      await sb.from('projects').update({yarn_ids:yarnIds}).eq('id',linkedProjId);
+    }
+  }
+  if(ePalId){const i=state.palettes.findIndex(p=>p.id===ePalId);if(i>=0)state.palettes[i]=row;}
+  else state.palettes.unshift(row);
+  setSyncStatus('','synced');showToast('Palette saved');
+  closeModal('palette-modal');renderPalettes();
+}
+
+function selectLinkChoice(choice){
+  linkPromptChoice=choice;
+  document.getElementById('link-choice-keep').classList.toggle('chosen',choice==='keep');
+  document.getElementById('link-choice-replace').classList.toggle('chosen',choice==='replace');
+}
+
+async function confirmLinkChoice(){
+  if(!linkPromptChoice){showToast('Please select an option');return;}
+  document.getElementById('link-prompt-overlay').classList.add('hidden');
+  const d=linkPromptPalId;
+  await doSavePalette(d.name,d.yarn_ids,d.linked_pattern_id,d.linked_project_id,linkPromptChoice);
+  linkPromptPalId=null;linkPromptProjId=null;linkPromptChoice=null;
+}
+
+function closeLinkPrompt(){
+  document.getElementById('link-prompt-overlay').classList.add('hidden');
+  linkPromptPalId=null;linkPromptProjId=null;linkPromptChoice=null;
+}
+
+async function delPalette(id){
+  if(isDemo()){showToast('Read-only in demo mode');return;}
+  if(!confirm('Delete this palette?'))return;
+  await sb.from('palettes').delete().eq('id',id);
+  state.palettes=state.palettes.filter(p=>p.id!==id);
+  renderPalettes();showToast('Palette deleted');
+}
+
+// -- MOOD BOARD --
+let curMbId=null;
+let mbDrawing=false;
+let mbColor='#c8a882';
+let mbBrushSize=2;
+let mbIsEraser=false;
+let mbLastX=0;
+let mbLastY=0;
+
+function renderMoodboards(){
+  const el=document.getElementById('moodboard-grid');
+  if(!el)return;
+  if(!state.moodboards||!state.moodboards.length){
+    el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">No boards yet</div><div class="empty-sub">Create your first mood board above</div></div>';
+    return;
+  }
+  el.innerHTML=state.moodboards.map(mb=>{
+    const imgs=(mb.images||[]).slice(0,2);
+    let coverHtml='';
+    if(imgs.length){
+      coverHtml=imgs.map(img=>`<img src="${esc(img.url)}" alt="">`).join('');
+      if(mb.sketch_data&&imgs.length<2) coverHtml+=`<img src="${mb.sketch_data}" alt="">`;
+    } else if(mb.sketch_data){
+      coverHtml=`<img src="${mb.sketch_data}" alt="">`;
+    } else {
+      coverHtml='<div class="mb-card-cover-placeholder">No images yet</div>';
+    }
+    const imgCount=(mb.images||[]).length;
+    const date=mb.created_at?new Date(mb.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+    return `<div class="mb-card" onclick="openMoodboardViewer('${mb.id}')">
+      <div class="mb-card-cover">${coverHtml}</div>
+      <div class="mb-card-body">
+        <div class="mb-card-title">${esc(mb.name)}</div>
+        <div class="mb-card-meta">${imgCount?imgCount+' image'+(imgCount!==1?'s':''):'No images'}${mb.sketch_data?' &middot; sketch':''} &middot; ${date}</div>
+      </div>
+      <div class="mb-card-footer">
+        <button class="btn-sm" onclick="event.stopPropagation();openMoodboardViewer('${mb.id}')">Open</button>
+        <button class="btn-sm danger" onclick="event.stopPropagation();delMoodboard('${mb.id}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openMoodboardModal(){
+  if(isDemo()){showToast('Read-only in demo mode');return;}
+  document.getElementById('mb-modal-name').value='';
+  document.getElementById('moodboard-modal-title').textContent='New Board';
+  document.getElementById('moodboard-modal').classList.remove('hidden');
+}
+
+async function saveMoodboard(){
+  if(isDemo()){showToast('Read-only in demo mode');return;}
+  const name=document.getElementById('mb-modal-name').value.trim();
+  if(!name){alert('Please enter a board name');return;}
+  const row={id:uid(),name,notes:'',images:[],sketch_data:null};
+  setSyncStatus('syncing','saving...');
+  const{error}=await sb.from('moodboards').insert(row);
+  if(error){showToast('Save failed: '+error.message);setSyncStatus('error','save error');return;}
+  state.moodboards.unshift(row);
+  setSyncStatus('','synced');showToast('Board created');
+  closeModal('moodboard-modal');
+  renderMoodboards();
+  openMoodboardViewer(row.id);
+}
+
+async function delMoodboard(id){
+  if(isDemo()){showToast('Read-only in demo mode');return;}
+  if(!confirm('Delete this board?'))return;
+  const mb=state.moodboards.find(m=>m.id===id);
+  if(mb&&mb.images){for(const img of mb.images){if(img.path)await sb.storage.from('moodboard-images').remove([img.path]);}}
+  await sb.from('moodboards').delete().eq('id',id);
+  state.moodboards=state.moodboards.filter(m=>m.id!==id);
+  renderMoodboards();showToast('Board deleted');
+}
+
+function openMoodboardViewer(id){
+  const mb=state.moodboards.find(m=>m.id===id);if(!mb)return;
+  curMbId=id;
+  document.getElementById('mb-viewer-title').textContent=mb.name;
+  document.getElementById('mb-notes-ta').value=mb.notes||'';
+  document.body.style.overflow='hidden';
+  document.getElementById('moodboard-viewer').classList.remove('hidden');
+  renderMbImages();
+  initMbCanvas(mb.sketch_data||null);
+}
+
+function closeMoodboardViewer(){
+  document.getElementById('moodboard-viewer').classList.add('hidden');
+  document.body.style.overflow='';
+  curMbId=null;
+}
+
+function renderMbImages(){
+  const mb=state.moodboards.find(m=>m.id===curMbId);if(!mb)return;
+  const grid=document.getElementById('mb-images-grid');
+  grid.innerHTML=(mb.images||[]).map((img,i)=>`<div class="mb-img-wrap">
+    <img src="${esc(img.url)}" alt="" onclick="showLightbox('${esc(img.url)}','')">
+    <button class="mb-img-del" onclick="removeMbImage(${i})">x</button>
+  </div>`).join('')+
+  `<div class="mb-add-img-btn" onclick="document.getElementById('mb-img-input').click()">
+    <div style="font-size:20px">+</div>
+    <div style="font-family:var(--f-body);font-size:9px;letter-spacing:2px;text-transform:uppercase">Add image</div>
+  </div>`;
+}
+
+async function handleMoodboardImage(e){
+  if(isDemo()){showToast('Read-only in demo mode');return;}
+  const f=e.target.files[0];if(!f)return;
+  setSyncStatus('syncing','uploading...');
+  const path='moodboard-images/'+uid()+'-'+f.name.replace(/\s/g,'_');
+  const{error}=await sb.storage.from('moodboard-images').upload(path,f,{contentType:f.type});
+  if(error){showToast('Upload failed');setSyncStatus('error','upload error');return;}
+  const{data}=sb.storage.from('moodboard-images').getPublicUrl(path);
+  const mb=state.moodboards.find(m=>m.id===curMbId);if(!mb)return;
+  if(!mb.images)mb.images=[];
+  mb.images.push({url:data.publicUrl,path});
+  await sb.from('moodboards').update({images:mb.images}).eq('id',curMbId);
+  setSyncStatus('','synced');renderMbImages();
+  e.target.value='';
+}
+
+async function removeMbImage(idx){
+  if(isDemo()){showToast('Read-only in demo mode');return;}
+  const mb=state.moodboards.find(m=>m.id===curMbId);if(!mb)return;
+  const img=mb.images[idx];
+  if(img.path)await sb.storage.from('moodboard-images').remove([img.path]);
+  mb.images.splice(idx,1);
+  await sb.from('moodboards').update({images:mb.images}).eq('id',curMbId);
+  renderMbImages();
+}
+
+async function saveMoodboardNotes(){
+  if(isDemo()){showToast('Read-only in demo mode');return;}
+  const mb=state.moodboards.find(m=>m.id===curMbId);if(!mb)return;
+  mb.notes=document.getElementById('mb-notes-ta').value;
+  await sb.from('moodboards').update({notes:mb.notes}).eq('id',curMbId);
+  showToast('Notes saved');
+}
+
+function initMbCanvas(sketchData){
+  const canvas=document.getElementById('mb-sketch-canvas');
+  const wrap=document.getElementById('mb-canvas-wrap');
+  const w=Math.min(270,(wrap.clientWidth||290)-20);
+  const h=Math.min(400,(wrap.clientHeight||420)-20);
+  canvas.width=w;canvas.height=h;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#1e160e';
+  ctx.fillRect(0,0,w,h);
+  if(sketchData){
+    const img=new Image();
+    img.onload=()=>ctx.drawImage(img,0,0,w,h);
+    img.src=sketchData;
+  }
+}
+
+function getMbCanvasPos(e){
+  const canvas=document.getElementById('mb-sketch-canvas');
+  const r=canvas.getBoundingClientRect();
+  const src=e.touches?e.touches[0]:e;
+  return{x:src.clientX-r.left,y:src.clientY-r.top};
+}
+
+function setMbBrush(idx){
+  const sizes=[2,5,12,20];
+  document.querySelectorAll('.mb-brush-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  mbBrushSize=sizes[idx];
+  mbIsEraser=(idx===3);
+}
+
+function setMbColor(el,color){
+  mbColor=color;mbIsEraser=false;
+  document.querySelectorAll('.mb-color-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setMbColorHex(color){
+  mbColor=color;mbIsEraser=false;
+  document.querySelectorAll('.mb-color-btn').forEach(b=>b.classList.remove('active'));
+}
+
+function clearMbCanvas(){
+  const canvas=document.getElementById('mb-sketch-canvas');
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#1e160e';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+}
+
+async function saveMbSketch(){
+  if(isDemo()){showToast('Read-only in demo mode');return;}
+  const canvas=document.getElementById('mb-sketch-canvas');
+  const data=canvas.toDataURL('image/png');
+  const mb=state.moodboards.find(m=>m.id===curMbId);if(!mb)return;
+  mb.sketch_data=data;
+  await sb.from('moodboards').update({sketch_data:data}).eq('id',curMbId);
+  showToast('Sketch saved');
+}
+
+function setupMbCanvasListeners(){
+  const canvas=document.getElementById('mb-sketch-canvas');
+  if(!canvas)return;
+  canvas.addEventListener('mousedown',e=>{mbDrawing=true;const p=getMbCanvasPos(e);mbLastX=p.x;mbLastY=p.y;});
+  canvas.addEventListener('mousemove',e=>{
+    if(!mbDrawing)return;
+    const p=getMbCanvasPos(e);
+    const ctx=canvas.getContext('2d');
+    ctx.beginPath();ctx.lineWidth=mbBrushSize;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.strokeStyle=mbIsEraser?'#1e160e':mbColor;
+    ctx.moveTo(mbLastX,mbLastY);ctx.lineTo(p.x,p.y);ctx.stroke();
+    mbLastX=p.x;mbLastY=p.y;
+  });
+  canvas.addEventListener('mouseup',()=>{mbDrawing=false;});
+  canvas.addEventListener('mouseleave',()=>{mbDrawing=false;});
+  canvas.addEventListener('touchstart',e=>{e.preventDefault();mbDrawing=true;const p=getMbCanvasPos(e);mbLastX=p.x;mbLastY=p.y;},{passive:false});
+  canvas.addEventListener('touchmove',e=>{
+    e.preventDefault();if(!mbDrawing)return;
+    const p=getMbCanvasPos(e);
+    const ctx=canvas.getContext('2d');
+    ctx.beginPath();ctx.lineWidth=mbBrushSize;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.strokeStyle=mbIsEraser?'#1e160e':mbColor;
+    ctx.moveTo(mbLastX,mbLastY);ctx.lineTo(p.x,p.y);ctx.stroke();
+    mbLastX=p.x;mbLastY=p.y;
+  },{passive:false});
+  canvas.addEventListener('touchend',()=>{mbDrawing=false;});
 }
 
 // ── START ──
