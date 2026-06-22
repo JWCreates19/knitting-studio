@@ -14,6 +14,9 @@
 <link rel="icon" type="image/png" href="icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Knitting Studio">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400;1,9..144,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -28,6 +31,7 @@
   --border:#c8b89a; --border-soft:#e0d5c0;
   --f-display:'Fraunces',Georgia,serif;
   --f-body:'Jost','Helvetica Neue',Arial,sans-serif;
+  --f-hand:'Caveat','Segoe Script',cursive;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--cream);font-family:var(--f-body);font-weight:300;color:var(--ink);min-height:100vh;background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(180,155,110,0.07) 27px,rgba(180,155,110,0.07) 28px);}
@@ -35,17 +39,38 @@ body{background:var(--cream);font-family:var(--f-body);font-weight:300;color:var
 /* LOADING SCREEN */
 #loading-screen{position:fixed;inset:0;background:var(--parchment);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
 #loading-screen.hidden{display:none;}
-.loading-title{font-family:var(--f-display);font-size:36px;font-weight:300;font-style:italic;color:var(--ink);}
+.loading-title{font-family:var(--f-hand);font-size:46px;font-weight:600;color:var(--sage-dark);}
+.loading-title em{font-style:normal;color:var(--terra);}
 .loading-title em{font-style:normal;color:var(--terra);}
 .loading-sub{font-family:var(--f-body);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-light);}
 .loading-spinner{width:32px;height:32px;border:2px solid var(--border);border-top:2px solid var(--sage-dark);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
 /* HEADER */
-.app-header{background:var(--parchment);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;}
-.app-title{font-family:var(--f-display);font-size:30px;font-weight:300;font-style:italic;color:var(--ink);letter-spacing:-0.5px;line-height:1;}
-.app-title em{font-style:normal;color:var(--terra);font-weight:400;}
-.header-actions{display:flex;gap:8px;align-items:center;}
+.app-header{background:var(--parchment);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;justify-content:space-between;min-height:60px;position:sticky;top:0;z-index:100;flex-wrap:wrap;row-gap:8px;}
+.app-brand{display:flex;align-items:center;gap:13px;}
+.app-logo{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--sage);box-shadow:0 1px 3px rgba(61,50,34,.16);flex-shrink:0;}
+.app-wordmark{display:flex;flex-direction:column;justify-content:center;line-height:1;}
+.app-title{font-family:var(--f-hand);font-size:31px;font-weight:600;font-style:normal;color:var(--sage-dark);letter-spacing:0;line-height:.92;white-space:nowrap;}
+.app-title em{font-style:normal;color:var(--terra);font-weight:600;}
+.app-tagline{font-family:var(--f-body);font-size:8.5px;font-weight:400;letter-spacing:3px;text-transform:uppercase;color:var(--ink-light);margin-top:3px;padding-left:1px;}
+@media(max-width:900px){.app-tagline{display:none;}.app-title{font-size:27px;}.app-logo{width:42px;height:42px;}.app-brand{gap:11px;}}
+@media(max-width:560px){.app-title{font-size:22px;white-space:normal;line-height:.9;}.app-logo{width:40px;height:40px;}.app-brand{gap:9px;}}
+.header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;min-width:0;}
+@media(max-width:640px){.sync-indicator{display:none;}.global-search-input{width:128px;}.global-search-input:focus{width:150px;}}
+.hamburger{display:none;font-size:19px;line-height:1;background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--ink-mid);cursor:pointer;padding:8px 12px;}
+.hamburger:hover{color:var(--ink);border-color:var(--ink-mid);}
+@media(max-width:760px){
+  .hamburger{display:inline-flex;align-items:center;justify-content:center;}
+  .header-actions{display:none;}
+  #app-nav{display:none;}
+  body.menu-open .header-actions{display:flex;flex-wrap:wrap;width:100%;flex-basis:100%;gap:8px;padding-top:10px;margin-top:8px;border-top:1px solid var(--border-soft);}
+  body.menu-open .global-search-wrap{flex-basis:100%;}
+  body.menu-open .global-search-input,body.menu-open .global-search-input:focus{width:100%;}
+  body.menu-open #app-nav{display:flex;flex-direction:column;overflow:visible;padding:0;}
+  body.menu-open #app-nav .nav-tab{text-align:left;padding:13px 24px;border-bottom:1px solid var(--border-soft);border-left:3px solid transparent;top:0;}
+  body.menu-open #app-nav .nav-tab.active{color:var(--sage-dark);border-left:3px solid var(--sage);border-bottom:1px solid var(--border-soft);}
+}
 .btn-utility{font-family:var(--f-body);font-size:10px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;padding:6px 12px;border:1px solid var(--border);background:transparent;color:var(--ink-mid);cursor:pointer;border-radius:2px;}
 .btn-utility:hover{background:var(--parchment-d);}
 .sync-indicator{font-family:var(--f-body);font-size:10px;letter-spacing:1px;color:var(--ink-faint);}
@@ -66,36 +91,61 @@ body{background:var(--cream);font-family:var(--f-body);font-weight:300;color:var
 .gs-item-meta{font-family:var(--f-body);font-size:10px;color:var(--ink-light);white-space:nowrap;flex-shrink:0;}
 .gs-empty{font-family:var(--f-body);font-size:12px;font-weight:300;font-style:italic;color:var(--ink-light);padding:14px 12px;}
 .nav-tabs{background:var(--parchment);border-bottom:1px solid var(--border);display:flex;padding:0 24px;overflow-x:auto;}
-.nav-tab{font-family:var(--f-body);font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;padding:13px 18px 11px;cursor:pointer;border:none;background:transparent;color:var(--ink-light);border-bottom:2px solid transparent;transition:all .15s;position:relative;top:1px;white-space:nowrap;}
-.nav-tab:hover{color:var(--ink);}
-.nav-tab.active{color:var(--ink);border-bottom:2px solid var(--ink);}
+.nav-tab{font-family:var(--f-body);font-size:11px;font-weight:400;letter-spacing:2px;text-transform:uppercase;padding:13px 17px 11px;cursor:pointer;border:none;background:transparent;color:var(--ink-light);border-bottom:2px solid transparent;transition:all .15s;position:relative;top:1px;white-space:nowrap;line-height:1;}
+.nav-tab:hover{color:var(--ink-mid);}
+.nav-tab.active{color:var(--sage-dark);border-bottom:2px solid var(--sage);}
 
 /* PAGES */
 .page{display:none;padding:24px;max-width:1200px;margin:0 auto;}
 .page.active{display:block;}
 
-/* HOME / DASHBOARD */
-.home-hero{margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--border-soft);}
-.home-greeting{font-family:var(--f-display);font-size:30px;font-weight:300;font-style:italic;color:var(--ink);}
-.home-sub{font-family:var(--f-body);font-size:12px;font-weight:300;color:var(--ink-light);margin-top:4px;letter-spacing:.3px;}
-.home-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:26px;}
-.home-stat{background:var(--parchment);border:1px solid var(--border);border-radius:2px;box-shadow:2px 2px 0 var(--border-soft);padding:16px 18px;}
-.home-stat-val{font-family:var(--f-display);font-size:30px;font-weight:300;color:var(--ink);line-height:1;}
-.home-stat-lbl{font-family:var(--f-body);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-mid);margin-top:8px;}
-.home-stat-sub{font-family:var(--f-body);font-size:10px;font-weight:300;color:var(--ink-faint);margin-top:2px;}
-.home-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
-@media(max-width:680px){.home-cols{grid-template-columns:1fr;}}
+/* HOME / DASHBOARD — atelier */
+.home-mast{margin-bottom:16px;}
+.home-greeting{font-family:var(--f-display);font-size:30px;font-weight:300;font-style:italic;color:var(--ink);line-height:1;}
+.home-sub{font-family:var(--f-body);font-size:10px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--ink-light);margin-top:8px;}
+.home-thought{display:flex;align-items:center;gap:13px;background:var(--parchment);border:1px solid var(--border-soft);border-left:3px solid var(--sage);border-radius:3px;padding:13px 18px;margin-bottom:20px;}
+.home-thought-ico{flex-shrink:0;color:var(--sage-dark);display:flex;}
+.home-thought-lbl{font-family:var(--f-body);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--sage-dark);}
+.home-thought-txt{font-family:var(--f-hand);font-size:23px;font-weight:500;line-height:1.1;color:var(--ink-mid);}
+.home-hero{display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:var(--parchment);box-shadow:2px 2px 0 var(--border-soft);margin-bottom:22px;}
+.home-hero-photo{width:240px;flex-shrink:0;min-height:210px;background-size:cover;background-position:center;background-color:var(--parchment-d);cursor:pointer;box-shadow:inset 0 0 0 7px var(--parchment),inset 0 0 0 8px var(--border-soft);}
+.home-hero-noph{display:flex;align-items:center;justify-content:center;}
+.home-hero-init{font-family:var(--f-display);font-size:80px;font-style:italic;color:var(--ink-faint);}
+.home-hero-body{flex:1;padding:22px 26px;display:flex;flex-direction:column;justify-content:center;}
+.home-hero-over{font-family:var(--f-body);font-size:9px;letter-spacing:2.4px;text-transform:uppercase;color:var(--terra);}
+.home-hero-title{font-family:var(--f-display);font-size:28px;font-weight:300;font-style:italic;color:var(--ink);margin:5px 0 2px;line-height:1.05;}
+.home-hero-cap{font-family:var(--f-hand);font-size:22px;font-weight:500;color:var(--ink-light);line-height:1.1;}
+.home-stitches{margin:11px 0 16px;display:block;}
+.home-stitches path{fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+.home-hero-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.home-link{font-family:var(--f-body);font-size:11px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;color:var(--terra);cursor:pointer;border-bottom:1px solid var(--terra);padding-bottom:2px;line-height:1.4;}
+.home-link:hover{color:var(--ink-mid);border-color:var(--ink-mid);}
+.home-dots{display:flex;gap:5px;}
+.home-dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.12);flex-shrink:0;}
+.home-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:20px;}
 .home-col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-family:var(--f-display);font-size:19px;font-style:italic;color:var(--ink);}
-.home-row{display:flex;align-items:center;gap:12px;background:var(--parchment);border:1px solid var(--border);border-radius:2px;box-shadow:1px 1px 0 var(--border-soft);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:transform .12s;}
+.home-row{display:flex;align-items:center;gap:12px;background:var(--parchment);border:1px solid var(--border-soft);border-radius:3px;padding:11px 13px;margin-bottom:8px;cursor:pointer;transition:transform .12s;}
 .home-row:hover{transform:translateX(2px);}
-.home-row-title{font-family:var(--f-display);font-size:15px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.home-row-meta{font-family:var(--f-body);font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-light);margin-top:3px;}
-.home-row-pct{font-family:var(--f-display);font-size:16px;color:var(--ink-mid);flex-shrink:0;}
-.home-empty{font-family:var(--f-body);font-size:12px;font-weight:300;font-style:italic;color:var(--ink-light);padding:14px 4px;}
+.home-row-av{width:38px;height:38px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.1);background-size:cover;background-position:center;}
+.home-row-title{font-family:var(--f-display);font-size:15px;font-style:italic;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.home-row-cap{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);line-height:1.3;margin-top:3px;}
+.home-empty{font-family:var(--f-display);font-style:italic;font-size:14px;font-weight:300;color:var(--ink-light);padding:10px 2px;}
+.home-palette{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--parchment);border:1px solid var(--border-soft);border-radius:3px;padding:14px 18px;margin-bottom:18px;cursor:pointer;transition:transform .12s;}
+.home-palette:hover{transform:translateX(2px);}
+.home-dab{width:21px;height:21px;border-radius:48% 52% 50% 50%/55% 45% 55% 45%;border:1px solid rgba(0,0,0,.08);flex-shrink:0;}
+.home-palette-cap{font-family:var(--f-body);font-size:10px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-mid);margin-left:6px;}
+.home-ledger{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:5px 16px;font-family:var(--f-body);font-size:11px;letter-spacing:.5px;color:var(--ink-light);padding:4px 0 6px;}
+.home-ledger b{font-family:var(--f-display);font-size:15px;color:var(--ink-mid);font-weight:400;}
+.home-ledger i{color:var(--ink-faint);font-style:normal;}
+@media(max-width:680px){.home-cols{grid-template-columns:1fr;}.home-hero{flex-direction:column;}.home-hero-photo{width:100%;min-height:180px;}}
 
 /* SECTION HEADER */
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border-soft);gap:12px;flex-wrap:wrap;}
 .section-title{font-family:var(--f-display);font-size:26px;font-weight:300;font-style:italic;color:var(--ink);}
+.section-title,.stash-section-title{display:inline-flex;align-items:center;gap:10px;}
+.sec-ic{display:inline-flex;flex-shrink:0;color:var(--sage-dark);}
+.sec-ic svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:block;}
+.stash-section-title .sec-ic svg{width:20px;height:20px;}
 .section-header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 
 /* FILTER BAR */
@@ -146,7 +196,7 @@ body.dark .proj-drag-handle{background:rgba(30,27,24,.9);}
 .chip-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;align-items:center;}
 .yarn-chip{width:14px;height:14px;border-radius:50%;border:1px solid rgba(61,50,34,.2);display:inline-block;}
 .linked-badge{font-family:var(--f-body);font-size:9px;font-weight:400;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:1px;border:1px solid var(--lav);background:var(--lav-light);color:#4a3a7a;}
-.card-footer{border-top:1px solid var(--border-soft);padding:9px 16px;display:flex;gap:6px;}
+.card-footer{border-top:1px solid var(--border-soft);padding:9px 16px;display:flex;gap:6px;flex-wrap:wrap;}
 
 /* YARN CARD */
 .yarn-card{background:var(--parchment);border:1px solid var(--border);border-radius:2px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start;box-shadow:2px 2px 0 var(--border-soft);transition:transform .15s;}
@@ -187,8 +237,8 @@ body.dark .proj-drag-handle{background:rgba(30,27,24,.9);}
 .pattern-card-inner{padding:14px 16px;display:flex;gap:14px;align-items:center;}
 .pattern-icon{width:44px;height:56px;background:var(--parchment-d);border:1px solid var(--border);border-radius:1px 8px 1px 1px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;position:relative;}
 .pattern-icon::after{content:’’;position:absolute;top:-1px;right:-1px;border-style:solid;border-width:0 9px 9px 0;border-color:transparent var(--cream) transparent transparent;}
-.pattern-info{flex:1;}
-.pattern-name{font-family:var(--f-display);font-size:17px;font-weight:400;font-style:italic;color:var(--ink);margin-bottom:3px;}
+.pattern-info{flex:1;min-width:0;}
+.pattern-name{font-family:var(--f-display);font-size:17px;font-weight:400;font-style:italic;color:var(--ink);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pattern-meta{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);}
 
 /* STASH SECTIONS */
@@ -547,7 +597,14 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
 </div>
 
 <header class="app-header hidden" id="app-header">
-  <div class="app-title">Knitting <em>Studio</em></div>
+  <div class="app-brand">
+    <img src="icon.png" alt="Knitting Studio" class="app-logo">
+    <div class="app-wordmark">
+      <span class="app-title">Knitting <em>Studio</em></span>
+      <span class="app-tagline">a maker's journal</span>
+    </div>
+  </div>
+  <button class="hamburger" id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">☰</button>
   <div class="header-actions">
     <div class="global-search-wrap">
       <input type="text" id="global-search" class="global-search-input" placeholder="Search everything…" autocomplete="off" oninput="globalSearch(this.value)" onfocus="globalSearch(this.value)">
@@ -572,28 +629,31 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
 
 <!-- HOME / DASHBOARD -->
 <div id="page-home" class="page active hidden">
-  <div class="home-hero">
-    <div class="home-greeting" id="home-greeting">Welcome back</div>
-    <div class="home-sub">Here's where your making stands today.</div>
+  <div class="home-mast">
+    <div class="home-greeting" id="home-greeting">Good afternoon</div>
+    <div class="home-sub" id="home-datesub"></div>
   </div>
-  <div class="home-stats" id="home-stats"></div>
+  <div id="home-thought"></div>
+  <div id="home-hero"></div>
   <div class="home-cols">
     <div class="home-col">
-      <div class="home-col-head"><span>On the Needles</span><button class="btn-sm" onclick="switchTab('projects')">All projects →</button></div>
+      <div class="home-col-head"><span>Also in your basket</span><button class="btn-sm" onclick="switchTab('projects')">all projects →</button></div>
       <div id="home-active"></div>
     </div>
     <div class="home-col">
-      <div class="home-col-head"><span>Ready to Cast On</span><button class="btn-sm" onclick="switchTab('stash')">The stash →</button></div>
+      <div class="home-col-head"><span>Ready to cast on</span><button class="btn-sm" onclick="switchTab('stash')">the stash →</button></div>
       <div id="home-ready"></div>
     </div>
   </div>
+  <div id="home-swatches"></div>
+  <div class="home-ledger" id="home-stats"></div>
 </div>
 
 <!-- PROJECTS -->
 
 <div id="page-projects" class="page hidden">
   <div class="section-header">
-    <div class="section-title">My Projects</div>
+    <div class="section-title"><span class="sec-ic"><svg viewBox="0 0 24 24"><path d="M3 9 H21"/><circle cx="20.4" cy="9" r="1.3"/><path d="M7 9 q1.5 2.4 0 4.5"/><path d="M11 9 q1.5 2.4 0 4.5"/><path d="M15 9 q1.5 2.4 0 4.5"/><path d="M6 13.5 H17 V19 H6 Z"/><path d="M8.6 16 l1.3 1.3 l1.3 -1.3"/><path d="M12.6 16 l1.3 1.3 l1.3 -1.3"/></svg></span>My Projects</div>
     <button class="btn-add" onclick="openProjectModal()">+ Add Project</button>
   </div>
   <div class="filter-bar">
@@ -624,7 +684,7 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
     <div class="stash-section-header">
       <div style="display:flex;align-items:center;gap:8px;">
         <button class="stash-collapse-btn" id="yarn-collapse-btn" onclick="toggleStashSection('yarn')" title="Collapse">▲</button>
-        <div class="stash-section-title">Yarn</div>
+        <div class="stash-section-title"><span class="sec-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M5 10 C8 15 16 15 19 10"/><path d="M6 15 C9 11 15 11 18 15"/><path d="M9 5 C11 11 13 13 16 18.5"/><path d="M15 5.5 C13 11 11 13 8.5 18.6"/></svg></span>Yarn</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <input class="search-input" type="text" placeholder="Search yarn…" id="yarn-search" oninput="renderYarn()" style="width:160px;">
@@ -643,7 +703,7 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
     <div class="stash-section-header">
       <div style="display:flex;align-items:center;gap:8px;">
         <button class="stash-collapse-btn" id="needle-collapse-btn" onclick="toggleStashSection('needle')" title="Collapse">▲</button>
-        <div class="stash-section-title">Knitting Needles</div>
+        <div class="stash-section-title"><span class="sec-ic"><svg viewBox="0 0 24 24"><circle cx="5" cy="5" r="1.6"/><circle cx="19" cy="5" r="1.6"/><path d="M5.7 6 L19 20"/><path d="M18.3 6 L5 20"/></svg></span>Knitting Needles</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <span class="stash-note-trigger">
@@ -661,7 +721,7 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
     <div class="stash-section-header">
       <div style="display:flex;align-items:center;gap:8px;">
         <button class="stash-collapse-btn" id="acquire-collapse-btn" onclick="toggleStashSection('acquire')" title="Collapse">▲</button>
-        <div class="stash-section-title">Items to Acquire</div>
+        <div class="stash-section-title"><span class="sec-ic"><svg viewBox="0 0 24 24"><path d="M13 3 H20 V10 L11 19 L4 12 Z"/><circle cx="16.4" cy="6.6" r="1.3"/></svg></span>Items to Acquire</div>
       </div>
       <button class="btn-add" onclick="openAcquireModal()">+ Add</button>
     </div>
@@ -672,7 +732,7 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
 <!-- PALETTES SECTION -->
 <div class="stash-section palette-section">
   <div class="stash-section-header">
-    <div class="stash-section-title">Colour Palettes</div>
+    <div class="stash-section-title"><span class="sec-ic"><svg viewBox="0 0 24 24"><path d="M12 4 C6.5 4 3 7.6 3 11.6 C3 14.4 5.4 15.4 7.2 14.6 C9.2 13.7 10.6 15.6 9.6 17.6 C11.4 19.8 18 18 20 12 C21.4 7.4 17.2 4 12 4 Z"/><circle cx="7.5" cy="9" r="1.1"/><circle cx="11" cy="7" r="1.1"/><circle cx="15" cy="7.5" r="1.1"/></svg></span>Colour Palettes</div>
     <button class="btn-add" onclick="openPaletteBuilder()">+ New Palette</button>
   </div>
   <div id="palettes-list" class="list-stack"></div>
@@ -684,10 +744,10 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
 
 <div id="page-patterns" class="page hidden">
   <div class="section-header">
-    <div class="section-title">Patterns</div>
+    <div class="section-title"><span class="sec-ic"><svg viewBox="0 0 24 24"><path d="M12 6 C9.5 4.3 5.5 4.3 3 5.4 V18 C5.5 16.9 9.5 16.9 12 18.6 C14.5 16.9 18.5 16.9 21 18 V5.4 C18.5 4.3 14.5 4.3 12 6 Z"/><path d="M12 6 V18.6"/></svg></span>Patterns</div>
     <button class="btn-add" onclick="openPatternModal()">+ Add Pattern</button>
   </div>
-  <div class="cards-grid" id="patterns-list"></div>
+  <div class="list-stack" id="patterns-list"></div>
 </div>
 
 <!-- PROJECT MODAL -->
@@ -817,7 +877,7 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
 <!-- MOOD BOARD PAGE -->
 <div id="page-moodboard" class="page hidden">
   <div class="section-header">
-    <div class="section-title">Mood Board</div>
+    <div class="section-title"><span class="sec-ic"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1.5"/><path d="M6.5 16 L10 11.5 L12.5 14.5 L15.5 10 L17.5 16"/><circle cx="15.5" cy="8.5" r="1.1"/></svg></span>Mood Board</div>
     <button class="btn-add" onclick="openMoodboardModal()">+ New Board</button>
   </div>
   <div class="cards-grid" id="moodboard-grid"></div>
@@ -948,7 +1008,7 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
 
 <div id="page-feedback" class="page hidden">
   <div class="section-header">
-    <div class="section-title">Ideas & Feedback</div>
+    <div class="section-title"><span class="sec-ic"><svg viewBox="0 0 24 24"><path d="M12 20 V11"/><path d="M8.5 20 H15.5"/><path d="M12 13 C9 13 7 11 7 8 C10 8 12 10 12 13 Z"/><path d="M12 12 C15 12 17 10 17 7 C14 7 12 9 12 12 Z"/></svg></span>Ideas &amp; Feedback</div>
     <button class="btn-add" onclick="openFeedbackModal()">+ Add</button>
   </div>
   <div class="list-stack" id="feedback-list"></div>
@@ -1166,12 +1226,24 @@ function dbToPattern(r){
   return {id:r.id,name:r.name,notes:r.notes||[],highlightPos:r.highlight_pos||{},counter:r.counter||0,lastPage:r.last_page||1,pdfUrl:r.pdf_url||null,pdfPath:r.pdf_path||null};
 }
 
+function closeMobileMenu(){
+  if(!document.body.classList.contains('menu-open'))return;
+  document.body.classList.remove('menu-open');
+  const b=document.getElementById('hamburger-btn');
+  if(b){b.setAttribute('aria-expanded','false');b.textContent='☰';}
+}
+function toggleMobileMenu(){
+  const open=document.body.classList.toggle('menu-open');
+  const b=document.getElementById('hamburger-btn');
+  if(b){b.setAttribute('aria-expanded',open?'true':'false');b.textContent=open?'✕':'☰';}
+}
 function switchTab(t){
   document.querySelectorAll('.nav-tab').forEach((el,i)=>el.classList.toggle('active',['home','projects','stash','patterns','moodboard','feedback'][i]===t));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const pageEl=document.getElementById('page-'+t);
   pageEl.classList.remove('hidden');
   pageEl.classList.add('active');
+  closeMobileMenu();
   if(t==='home')renderHome();
   if(t==='projects')renderProjects();
   if(t==='stash'){renderYarn();renderNeedles();renderAcquire();renderPalettes();}
@@ -1226,7 +1298,52 @@ function gsOpen(type,id){
   else switchTab(type);
 }
 
-// ── HOME / DASHBOARD ──
+// ── HOME / DASHBOARD (atelier) ──
+const HOME_THOUGHTS=[
+  "Try pairing a colour you love with one that scares you a little.",
+  "A dropped stitch is just the yarn asking for some attention.",
+  "Cast on something small today — momentum loves a quick win.",
+  "Swatching is a love letter to your future self.",
+  "Knit a few rows slowly and let the rhythm do the thinking.",
+  "Stash diving counts as planning. Go wander your colours.",
+  "Finish the row before you decide you're stuck.",
+  "The best project is the one already in your hands.",
+  "Mix a smooth yarn with a fuzzy one and see what happens.",
+  "Frogging isn't failure — it's just rewinding the story.",
+  "Pick a colour that feels like today and start there.",
+  "Loosen your shoulders before you loosen your tension.",
+  "Leave tomorrow a few easy rows to come back to.",
+  "Every heirloom started as one nervous cast-on."
+];
+const HOME_SPRIG='<svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 21 V5"/><path d="M10 11 C6.5 10.5 4.5 8 5 5 C8.3 5.2 10 7.6 10 10.4"/><path d="M10 9 C13.5 8.2 15.3 5.6 14.8 2.6 C11.5 3 10 5.4 10 8"/><path d="M10 16 C7.2 15.6 5.7 13.4 6.2 11 C8.8 11.3 10 13.4 10 15.6"/></svg>';
+function progPhrase(p){
+  if(p>=100)return "bound off — finished!";
+  if(p>=85)return "in the home stretch";
+  if(p>=60)return "well underway";
+  if(p>=35)return "making good progress";
+  if(p>=15)return "just getting going";
+  if(p>0)return "early days";
+  return "a blank canvas, ready to begin";
+}
+function homeStitches(prog){
+  const total=12,cell=18;
+  const filled=Math.round((prog||0)/100*total);
+  let paths='';
+  for(let i=0;i<total;i++){
+    const x=i*cell;
+    const c=i<filled?'var(--sage-dark)':'var(--border)';
+    paths+=`<path d="M ${x+2} 3 L ${x+8} 13 L ${x+14} 3" style="stroke:${c}"/>`;
+  }
+  return `<svg class="home-stitches" viewBox="0 0 ${total*cell} 16" width="${total*cell}" height="15" aria-hidden="true">${paths}</svg>`;
+}
+function firstYarnColour(p){
+  const y=(p.yarnIds||[]).map(id=>state.yarn.find(z=>z.id===id)).filter(Boolean)[0];
+  return y?y.colour:null;
+}
+function projOpenCall(p){
+  const pat=p.patternId?state.patterns.find(x=>x.id===p.patternId):null;
+  return pat&&pat.pdfUrl?`openPdf('${pat.id}')`:`openProjectModal('${p.id}')`;
+}
 function renderHome(){
   const h=new Date().getHours();
   const greet=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
@@ -1241,41 +1358,67 @@ function renderHome(){
   const stashValue=yarn.reduce((s,y)=>s+(y.cost||0)*(y.skeins||0),0);
   const wishlist=(state.acquire||[]).length;
 
-  const tiles=[
-    {label:'On the needles',value:active.length,sub:active.length===1?'project':'projects'},
-    {label:'Yarn in stash',value:ownedYds.toLocaleString(),sub:'yds total'},
-    {label:'Free to use',value:availYds.toLocaleString(),sub:'yds available'},
-    {label:'Patterns',value:(state.patterns||[]).length,sub:'in library'},
-    {label:'Wishlist',value:wishlist,sub:wishlist===1?'item':'items'},
-  ];
-  if(stashValue>0)tiles.splice(3,0,{label:'Stash value',value:'$'+Math.round(stashValue).toLocaleString(),sub:'invested'});
-  document.getElementById('home-stats').innerHTML=tiles.map(t=>
-    `<div class="home-stat"><div class="home-stat-val">${t.value}</div><div class="home-stat-lbl">${t.label}</div><div class="home-stat-sub">${t.sub}</div></div>`).join('');
+  let dstr='';try{dstr=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});}catch(e){}
+  document.getElementById('home-datesub').textContent=dstr+(active.length?' · '+active.length+' on the needles':'');
 
-  // On the needles — in-progress, highest progress first
-  const aList=[...active].sort((a,b)=>(b.progress||0)-(a.progress||0)).slice(0,5);
-  const homeActive=document.getElementById('home-active');
-  homeActive.innerHTML=aList.length?aList.map(p=>{
-    const pat=p.patternId?state.patterns.find(x=>x.id===p.patternId):null;
-    const open=pat&&pat.pdfUrl?`openPdf('${pat.id}')`:`openProjectModal('${p.id}')`;
-    return `<div class="home-row" onclick="${open}"><div style="flex:1;min-width:0"><div class="home-row-title">${esc(p.name)}</div><div class="progress-wrap" style="margin-top:6px"><div class="progress-fill" style="width:${p.progress||0}%"></div></div></div><div class="home-row-pct">${p.progress||0}%</div></div>`;
-  }).join(''):'<div class="home-empty">Nothing on the needles yet. Cast something on!</div>';
+  // Thought for today (stable for the calendar day)
+  const ti=Math.floor(Date.now()/86400000)%HOME_THOUGHTS.length;
+  document.getElementById('home-thought').innerHTML=
+    `<span class="home-thought-ico">${HOME_SPRIG}</span><div><div class="home-thought-lbl">A thought for today</div><div class="home-thought-txt">${esc(HOME_THOUGHTS[ti])}</div></div>`;
+
+  // Featured project — the one to pick back up
+  const featured=[...active].sort((a,b)=>(b.progress||0)-(a.progress||0))[0]||queued[0]||null;
+  const hero=document.getElementById('home-hero');
+  if(featured){
+    const photos=featured.photos||[];
+    const cover=photos.length?photos[photos.length-1].url:null;
+    const pat=featured.patternId?state.patterns.find(x=>x.id===featured.patternId):null;
+    const yarns=(featured.yarnIds||[]).map(id=>state.yarn.find(y=>y.id===id)).filter(Boolean);
+    const dots=yarns.slice(0,6).map(y=>`<span class="home-dot" style="background:${y.colour}" title="${esc(y.name)}"></span>`).join('');
+    const prog=featured.progress||0;
+    const photoEl=cover
+      ?`<div class="home-hero-photo" style="background-image:url('${esc(cover)}')" onclick="openPhotoViewer('${featured.id}')"></div>`
+      :`<div class="home-hero-photo home-hero-noph" onclick="openProjectModal('${featured.id}')"><span class="home-hero-init">${esc((featured.name||'?').trim().charAt(0)||'?')}</span></div>`;
+    hero.innerHTML=`<div class="home-hero">${photoEl}<div class="home-hero-body"><div class="home-hero-over">${featured.status==='in-progress'?'On your needles now':'Next on your list'}</div><div class="home-hero-title">${esc(featured.name)}</div><div class="home-hero-cap">${progPhrase(prog)}</div>${homeStitches(prog)}<div class="home-hero-actions"><span class="home-link" onclick="${projOpenCall(featured)}">${pat&&pat.pdfUrl?'pick the needles back up →':'open this project →'}</span><div class="home-dots">${dots}</div></div></div></div>`;
+  }else{
+    hero.innerHTML=`<div class="home-hero"><div class="home-hero-body" style="align-items:center;text-align:center;padding:42px 26px"><div style="font-family:var(--f-display);font-style:italic;font-size:22px;color:var(--ink-mid)">Your needles are resting.</div><div style="margin-top:10px"><span class="home-link" onclick="switchTab('projects')">cast something on →</span></div></div></div>`;
+  }
+
+  // Also in your basket — other in-progress projects
+  const others=[...active].filter(p=>!featured||p.id!==featured.id).sort((a,b)=>(b.progress||0)-(a.progress||0)).slice(0,4);
+  document.getElementById('home-active').innerHTML=others.length?others.map(p=>{
+    const ph=p.photos||[];const c=firstYarnColour(p);
+    const av=ph.length?`style="background-image:url('${esc(ph[ph.length-1].url)}')"`:`style="background:${c||'var(--sage-light)'}"`;
+    return `<div class="home-row" onclick="${projOpenCall(p)}"><div class="home-row-av" ${av}></div><div style="flex:1;min-width:0"><div class="home-row-title">${esc(p.name)}</div><div class="home-row-cap">${progPhrase(p.progress||0)}</div></div></div>`;
+  }).join(''):'<div class="home-empty">Just the one on the needles right now.</div>';
 
   // Ready to cast on — queued projects, else top wishlist
   const homeReady=document.getElementById('home-ready');
-  if(queued.length){
-    homeReady.innerHTML=queued.slice(0,5).map(p=>{
-      const yarns=(p.yarnIds||[]).map(id=>state.yarn.find(y=>y.id===id)).filter(Boolean);
-      const have=yarns.reduce((s,y)=>s+Math.max(0,getYarnUsage(y.id).available+ (p.targetYards?p.targetYards/(p.yarnIds.length||1):0)),0);
-      const cover=p.targetYards?(have>=p.targetYards?`<span class="avail-badge avail-ok">yarn ready</span>`:`<span class="avail-badge avail-busy">${Math.round(have)}/${p.targetYards} yds</span>`):'';
-      return `<div class="home-row" onclick="openProjectModal('${p.id}')"><div style="flex:1;min-width:0"><div class="home-row-title">${esc(p.name)}</div><div class="home-row-meta">${p.needle?esc(p.needle):'queued'}</div></div>${cover}</div>`;
+  const q=queued.filter(p=>!featured||p.id!==featured.id);
+  if(q.length){
+    homeReady.innerHTML=q.slice(0,4).map(p=>{
+      const c=firstYarnColour(p);
+      return `<div class="home-row" onclick="openProjectModal('${p.id}')"><div class="home-row-av" style="background:${c||'var(--parchment-d)'}"></div><div style="flex:1;min-width:0"><div class="home-row-title">${esc(p.name)}</div><div class="home-row-cap">waiting in the wings</div></div></div>`;
     }).join('');
   }else{
     const order={must:0,wanting:1,nice:2};
-    const wl=[...(state.acquire||[])].sort((a,b)=>(order[a.priority]||2)-(order[b.priority]||2)).slice(0,5);
+    const wl=[...(state.acquire||[])].sort((a,b)=>(order[a.priority]||2)-(order[b.priority]||2)).slice(0,4);
     homeReady.innerHTML=wl.length?wl.map(aq=>
-      `<div class="home-row" onclick="switchTab('stash')"><div style="flex:1;min-width:0"><div class="home-row-title">${esc(aq.name)}</div><div class="home-row-meta">${esc(aq.type||'')}</div></div></div>`).join(''):'<div class="home-empty">Queue a project or add to your wishlist.</div>';
+      `<div class="home-row" onclick="switchTab('stash')"><div class="home-row-av" style="background:var(--parchment-d);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--terra)">♡</div><div style="flex:1;min-width:0"><div class="home-row-title">${esc(aq.name)}</div><div class="home-row-cap">on the wishlist</div></div></div>`).join(''):'<div class="home-empty">Dream up something new when you’re ready.</div>';
   }
+
+  // Your palette — stash colours as paint dabs
+  const colours=[...new Set(yarn.map(y=>y.colour).filter(Boolean))];
+  document.getElementById('home-swatches').innerHTML=colours.length
+    ?`<div class="home-palette" onclick="switchTab('stash')">${colours.slice(0,14).map(c=>`<span class="home-dab" style="background:${c}"></span>`).join('')}<span class="home-palette-cap">${ownedYds.toLocaleString()} yds resting in the basket →</span></div>`
+    :'';
+
+  // Quiet ledger
+  const patCount=(state.patterns||[]).length;
+  const led=[['on the needles',active.length],['in stash',ownedYds.toLocaleString()+' yds'],['free',availYds.toLocaleString()+' yds'],[patCount===1?'pattern':'patterns',patCount]];
+  if(stashValue>0)led.push(['stash value','$'+Math.round(stashValue).toLocaleString()]);
+  if(wishlist)led.push(['on the wishlist',wishlist]);
+  document.getElementById('home-stats').innerHTML=led.map((t,i)=>`${i?'<i>·</i>':''}<span><b>${t[1]}</b> ${t[0]}</span>`).join('');
 }
 
 // ── PROJECTS ──
@@ -1739,7 +1882,7 @@ function renderPatterns(){
           <div class="pattern-name">${esc(p.name)}</div>
           <div class="pattern-meta">${linked.has(p.id)?'Linked to a project':'Not linked to a project'}</div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
           <button class="btn-open" onclick="openPdf('${p.id}')">Open →</button>
           <button class="btn-sm danger" onclick="delPattern('${p.id}')">Delete</button>
         </div>
