@@ -246,6 +246,29 @@ body.dark .proj-drag-handle{background:rgba(30,27,24,.9);}
 .stash-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border-soft);}
 .stash-section-title{font-family:var(--f-display);font-size:22px;font-weight:300;font-style:italic;color:var(--ink);}
 .list-stack{display:flex;flex-direction:column;gap:10px;}
+/* RESOURCES */
+.res-block{background:var(--parchment);border:1px solid var(--border-soft);border-radius:3px;padding:18px 20px;margin-bottom:18px;box-shadow:2px 2px 0 var(--border-soft);}
+.res-block-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.res-block-title{font-family:var(--f-display);font-size:20px;font-style:italic;color:var(--ink);}
+.res-sub{font-family:var(--f-body);font-size:12px;font-weight:300;color:var(--ink-light);margin:4px 0 12px;line-height:1.5;}
+.res-table-wrap{overflow-x:auto;}
+.res-table{width:100%;border-collapse:collapse;font-family:var(--f-body);font-size:13px;font-weight:300;color:var(--ink-mid);}
+.res-table th{text-align:left;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-light);font-weight:400;padding:6px 14px 6px 0;border-bottom:1px solid var(--border);white-space:nowrap;}
+.res-table td{padding:8px 14px 8px 0;border-bottom:1px solid var(--border-soft);white-space:nowrap;}
+.res-table tbody tr:last-child td{border-bottom:none;}
+.res-group-lbl{font-family:var(--f-body);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--sage-dark);margin:14px 0 8px;}
+.res-group-lbl:first-child{margin-top:0;}
+.res-row{display:flex;align-items:center;gap:12px;background:var(--cream);border:1px solid var(--border-soft);border-radius:3px;padding:10px 14px;margin-bottom:8px;flex-wrap:wrap;}
+.res-row-title{font-family:var(--f-display);font-size:15px;font-style:italic;color:var(--ink);}
+.res-row-note{font-family:var(--f-body);font-size:11px;font-weight:300;color:var(--ink-light);margin-top:2px;}
+.res-nolink{font-family:var(--f-body);font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-faint);}
+/* YARN DETAIL */
+.yd-table{width:100%;border-collapse:collapse;}
+.yd-table td{padding:7px 0;border-bottom:1px solid var(--border-soft);vertical-align:top;font-family:var(--f-body);font-size:13px;font-weight:300;}
+.yd-table tr:last-child td{border-bottom:none;}
+.yd-k{color:var(--ink-light);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;width:34%;padding-right:12px;white-space:nowrap;}
+.yd-v{color:var(--ink-mid);}
+.yd-notes{margin-top:12px;padding-top:12px;border-top:1px solid var(--border-soft);font-family:var(--f-body);font-size:13px;font-weight:300;color:var(--ink-mid);line-height:1.6;white-space:pre-wrap;}
 
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(61,50,34,.4);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;}
@@ -623,6 +646,7 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
   <button class="nav-tab" onclick="switchTab('projects')">Projects</button>
   <button class="nav-tab" onclick="switchTab('stash')">The Stash</button>
   <button class="nav-tab" onclick="switchTab('patterns')">Patterns</button>
+  <button class="nav-tab" onclick="switchTab('resources')">Resources</button>
   <button class="nav-tab" onclick="switchTab('moodboard')">Mood Board</button>
   <button class="nav-tab" onclick="switchTab('feedback')">Ideas & Feedback</button>
 </nav>
@@ -747,7 +771,64 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
     <div class="section-title"><span class="sec-ic"><svg viewBox="0 0 24 24"><path d="M12 6 C9.5 4.3 5.5 4.3 3 5.4 V18 C5.5 16.9 9.5 16.9 12 18.6 C14.5 16.9 18.5 16.9 21 18 V5.4 C18.5 4.3 14.5 4.3 12 6 Z"/><path d="M12 6 V18.6"/></svg></span>Patterns</div>
     <button class="btn-add" onclick="openPatternModal()">+ Add Pattern</button>
   </div>
+  <div class="filter-bar">
+    <select class="filter-select" id="pat-filter-cat" onchange="renderPatterns()">
+      <option value="">All categories</option>
+      <option>Hats</option><option>Scarves &amp; Shawls</option><option>Sweaters &amp; Cardigans</option><option>Socks</option><option>Mittens &amp; Gloves</option><option>Blankets &amp; Home</option><option>Kids &amp; Baby</option><option>Toys / Amigurumi</option><option>Accessories</option><option>Other</option>
+    </select>
+    <select class="filter-select" id="pat-sort" onchange="renderPatterns()">
+      <option value="category">By category</option>
+      <option value="name">Name A–Z</option>
+      <option value="newest">Newest first</option>
+    </select>
+  </div>
   <div class="list-stack" id="patterns-list"></div>
+</div>
+
+<!-- RESOURCES -->
+<div id="page-resources" class="page hidden">
+  <div class="section-header">
+    <div class="section-title"><span class="sec-ic"><svg viewBox="0 0 24 24"><rect x="2.5" y="8.5" width="19" height="7" rx="1.2"/><path d="M6 8.5 V12"/><path d="M9.5 8.5 V11"/><path d="M13 8.5 V12"/><path d="M16.5 8.5 V11"/><path d="M20 8.5 V12"/></svg></span>Resources</div>
+  </div>
+  <div class="res-block">
+    <div class="res-block-title">Yarn weight &amp; needle size</div>
+    <div class="res-sub">A quick reference — always defer to your pattern and a gauge swatch.</div>
+    <div class="res-table-wrap">
+      <table class="res-table">
+        <thead><tr><th>Weight</th><th>US needles</th><th>Metric</th></tr></thead>
+        <tbody>
+          <tr><td>Lace</td><td>000–1</td><td>1.5–2.25 mm</td></tr>
+          <tr><td>Fingering</td><td>1–3</td><td>2.25–3.25 mm</td></tr>
+          <tr><td>Sport</td><td>3–5</td><td>3.25–3.75 mm</td></tr>
+          <tr><td>DK</td><td>5–7</td><td>3.75–4.5 mm</td></tr>
+          <tr><td>Worsted</td><td>7–9</td><td>4.5–5.5 mm</td></tr>
+          <tr><td>Aran</td><td>8–10</td><td>5–6 mm</td></tr>
+          <tr><td>Bulky</td><td>9–11</td><td>5.5–8 mm</td></tr>
+          <tr><td>Super Bulky</td><td>11–17</td><td>8–12.75 mm</td></tr>
+          <tr><td>Jumbo</td><td>17+</td><td>12.75 mm+</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="res-block">
+    <div class="res-block-head"><div class="res-block-title">Techniques &amp; how-tos</div><button class="btn-add" onclick="openResourceModal()">+ Add</button></div>
+    <div class="res-sub">Your saved cast-ons, bind-offs &amp; methods — add your own video or article links.</div>
+    <div id="resources-list" class="list-stack"></div>
+  </div>
+</div>
+
+<!-- RESOURCE MODAL -->
+<div class="modal-overlay hidden" id="resource-modal">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-title" id="resource-modal-title">Add Resource</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="res-title" type="text" placeholder="e.g. Long-tail tubular cast-on"></div>
+      <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="res-type"><option>Cast-on</option><option>Bind-off</option><option>Method</option><option>Other</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Link (URL)</label><input class="form-input" id="res-url" type="url" placeholder="https://www.youtube.com/watch?v=…"></div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="res-notes" placeholder="Optional — e.g. ‘best for 1x1 rib brims’"></textarea></div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('resource-modal')">Cancel</button><button class="btn-save" onclick="saveResource()">Save</button></div>
+  </div>
 </div>
 
 <!-- PROJECT MODAL -->
@@ -761,14 +842,22 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
       <div class="form-group"><label class="form-label">Needle Size</label><input class="form-input" id="p-needle" type="text" placeholder="US 7 / 4.5mm"></div>
     </div>
     <div class="form-group"><label class="form-label">Ravelry URL</label><input class="form-input" id="p-ravelry" type="url" placeholder="https://www.ravelry.com/patterns/…"></div>
-    <div class="form-group"><label class="form-label">Linked Pattern</label><select class="form-select" id="p-pattern"><option value="">None</option></select></div>
+    <div class="form-group"><label class="form-label">Linked Pattern</label><select class="form-select" id="p-pattern" onchange="renderProjectYarnPicker()"><option value="">None</option></select></div>
     <div class="form-group"><label class="form-label">Progress — <span id="p-prog-val">0</span>%</label><input class="form-range" id="p-prog" type="range" min="0" max="100" value="0" step="1" oninput="document.getElementById('p-prog-val').textContent=this.value"></div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Start Date</label><input class="form-input" id="p-start" type="date"></div>
       <div class="form-group"><label class="form-label">End Date</label><input class="form-input" id="p-end" type="date"></div>
     </div>
     <div class="form-group"><label class="form-label">Target Yardage</label><input class="form-input" id="p-target-yards" type="number" placeholder="e.g. 1200"></div>
-    <div class="form-group"><label class="form-label">Yarn Used</label><div class="chip-selector" id="p-yarn-sel"></div></div>
+    <div class="form-group">
+      <label class="form-label">Yarn Used</label>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:7px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:5px;font-family:var(--f-body);font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-light);cursor:pointer;"><input type="checkbox" id="p-yarn-allweights" onchange="renderProjectYarnPicker()" style="accent-color:var(--sage-dark);"> Show all weights</label>
+        <span id="p-yarn-hint" style="font-family:var(--f-body);font-size:10px;font-style:italic;color:var(--ink-faint);"></span>
+        <button type="button" class="btn-sm" onclick="addYarnFromProject()" style="margin-left:auto;">+ Add yarn</button>
+      </div>
+      <div class="chip-selector" id="p-yarn-sel"></div>
+    </div>
     <div class="form-group"><label class="form-label">Needles Used</label><select class="needle-multi-select" id="p-needle-sel" multiple size="4"></select><div style="font-size:10px;color:var(--ink-faint);margin-top:4px;letter-spacing:0.5px;">Hold Ctrl / Cmd to select multiple</div></div>
     <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="p-notes" placeholder="Modifications, stitch counts, reminders…"></textarea></div>
     <div class="form-group">
@@ -814,7 +903,16 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
       <div id="y-photo-preview"></div>
     </div>
     <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="y-notes" placeholder="Care instructions, projects in mind…"></textarea></div>
-    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('yarn-modal')">Cancel</button><button class="btn-save" onclick="saveYarn()">Save Yarn</button></div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="window.__addYarnToProject=false;closeModal('yarn-modal')">Cancel</button><button class="btn-save" onclick="saveYarn()">Save Yarn</button></div>
+  </div>
+</div>
+
+<!-- YARN DETAIL (read-only) -->
+<div class="modal-overlay hidden" id="yarn-detail-modal">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-title" id="yd-title">Yarn</div>
+    <div id="yd-body"></div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('yarn-detail-modal')">Close</button><button class="btn-save" id="yd-edit-btn">Edit</button></div>
   </div>
 </div>
 
@@ -862,8 +960,12 @@ body.dark .stash-notes-footer{border-color:#2e2926;}
 
 <div class="modal-overlay hidden" id="pat-modal">
   <div class="modal">
-    <div class="modal-title">Add Pattern</div>
+    <div class="modal-title" id="pat-modal-title">Add Pattern</div>
     <div class="form-group"><label class="form-label">Pattern Name</label><input class="form-input" id="pat-name" type="text" placeholder="e.g. Heirloom Lace Shawl"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="pat-category"><option value="">—</option><option>Hats</option><option>Scarves &amp; Shawls</option><option>Sweaters &amp; Cardigans</option><option>Socks</option><option>Mittens &amp; Gloves</option><option>Blankets &amp; Home</option><option>Kids &amp; Baby</option><option>Toys / Amigurumi</option><option>Accessories</option><option>Other</option></select></div>
+      <div class="form-group"><label class="form-label">Yarn Weight</label><select class="form-select" id="pat-weight"><option value="">—</option><option>Lace</option><option>Fingering</option><option>Sport</option><option>DK</option><option>Worsted</option><option>Aran</option><option>Bulky</option><option>Super Bulky</option></select></div>
+    </div>
     <div class="form-group">
       <label class="form-label">PDF File</label>
       <div class="photo-upload" id="pdf-upload-label" onclick="document.getElementById('pat-pdf-input').click()">Click to choose a PDF file</div>
@@ -1085,7 +1187,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/p
 
 // ── STATE ──
 let isDemoMode=false;
-let state={projects:[],yarn:[],needles:[],acquire:[],patterns:[],feedback:[],stashNotes:{yarn:'',needles:''}};
+let state={projects:[],yarn:[],needles:[],acquire:[],patterns:[],feedback:[],stashNotes:{yarn:'',needles:''},resources:[]};
 let ePId=null,eYId=null,eNId=null,eAId=null;
 let pdfDoc=null,pdfPage=1,pdfTotal=1,curPat=null,cVal=0,hlOn=false,nCollapsed=false;
 let pdfScale=1,pdfBaseScale=1;
@@ -1192,7 +1294,7 @@ async function init(){
 }
 
 async function loadAll(){
-  const [proj,yarn,needles,acquire,patterns,feedback,notes,palettes,moodboards]=await Promise.all([
+  const [proj,yarn,needles,acquire,patterns,feedback,notes,palettes,moodboards,resources]=await Promise.all([
     sb.from('projects').select('*').order('created_at',{ascending:false}),
     sb.from('yarn').select('*').order('created_at',{ascending:false}),
     sb.from('needles').select('*').order('created_at',{ascending:false}),
@@ -1202,6 +1304,7 @@ async function loadAll(){
     sb.from('stash_notes').select('*'),
     sb.from('palettes').select('*').order('created_at',{ascending:false}),
     sb.from('moodboards').select('*').order('created_at',{ascending:false}),
+    sb.from('resources').select('*').order('sort_order',{ascending:true}),
   ]);
   state.projects=(proj.data||[]).map(dbToProject);
   state.yarn=(yarn.data||[]).map(dbToYarn);
@@ -1213,6 +1316,7 @@ async function loadAll(){
   (notes.data||[]).forEach(n=>{if(n.section==='yarn'||n.section==='needles')state.stashNotes[n.section]=n.content||'';});
   state.palettes=palettes.data||[];
   state.moodboards=moodboards.data||[];
+  state.resources=resources.data||[];
 }
 
 // DB row converters
@@ -1223,7 +1327,7 @@ function dbToYarn(r){
   return {id:r.id,name:r.name,brand:r.brand,colourName:r.colour_name,colour:r.colour,weight:r.weight,fibre:r.fibre,yardage:r.yardage,skeins:r.skeins,notes:r.notes,photo:r.photo||null,dyeLot:r.dye_lot||null,cost:r.cost!=null?r.cost:null,source:r.source||null};
 }
 function dbToPattern(r){
-  return {id:r.id,name:r.name,notes:r.notes||[],highlightPos:r.highlight_pos||{},counter:r.counter||0,lastPage:r.last_page||1,pdfUrl:r.pdf_url||null,pdfPath:r.pdf_path||null};
+  return {id:r.id,name:r.name,notes:r.notes||[],highlightPos:r.highlight_pos||{},counter:r.counter||0,lastPage:r.last_page||1,pdfUrl:r.pdf_url||null,pdfPath:r.pdf_path||null,category:r.category||'',weight:r.weight||''};
 }
 
 function closeMobileMenu(){
@@ -1238,7 +1342,7 @@ function toggleMobileMenu(){
   if(b){b.setAttribute('aria-expanded',open?'true':'false');b.textContent=open?'✕':'☰';}
 }
 function switchTab(t){
-  document.querySelectorAll('.nav-tab').forEach((el,i)=>el.classList.toggle('active',['home','projects','stash','patterns','moodboard','feedback'][i]===t));
+  document.querySelectorAll('.nav-tab').forEach((el,i)=>el.classList.toggle('active',['home','projects','stash','patterns','resources','moodboard','feedback'][i]===t));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const pageEl=document.getElementById('page-'+t);
   pageEl.classList.remove('hidden');
@@ -1248,6 +1352,7 @@ function switchTab(t){
   if(t==='projects')renderProjects();
   if(t==='stash'){renderYarn();renderNeedles();renderAcquire();renderPalettes();}
   if(t==='patterns')renderPatterns();
+  if(t==='resources')renderResources();
   if(t==='feedback')renderFeedback();
   if(t==='moodboard')renderMoodboards();
 }
@@ -1563,7 +1668,8 @@ function openProjectModal(id){
   patSel.innerHTML='<option value="">None</option>'+state.patterns.map(pt=>`<option value="${pt.id}"${p&&p.patternId===pt.id?' selected':''}>${esc(pt.name)}</option>`).join('');
   const selected=p?(p.yarnIds||[]):[];
   const nselected=p?(p.needleIds||[]):[];
-  document.getElementById('p-yarn-sel').innerHTML=state.yarn.length?state.yarn.map(y=>`<div class="chip-sel-item${selected.includes(y.id)?' selected':''}" data-id="${y.id}" onclick="this.classList.toggle('selected')"><span class="chip-dot" style="background:${y.colour}"></span>${esc(y.name)}</div>`).join(''):'<span style="font-size:12px;color:var(--ink-faint)">No yarn in stash</span>';
+  document.getElementById('p-yarn-allweights').checked=false;
+  renderProjectYarnPicker(selected);
   const needleSel=document.getElementById('p-needle-sel');
   if(!state.needles.length){needleSel.innerHTML='<option disabled>No needles in stash</option>';}
   else{
@@ -1581,6 +1687,32 @@ function openProjectModal(id){
     }).join('');
   }
   document.getElementById('proj-modal').classList.remove('hidden');
+}
+
+// Smart yarn picker — defaults to yarns matching the linked pattern's weight
+function renderProjectYarnPicker(preserveIds){
+  const cont=document.getElementById('p-yarn-sel');if(!cont)return;
+  const current=preserveIds!=null?preserveIds:[...cont.querySelectorAll('.chip-sel-item.selected')].map(el=>el.dataset.id);
+  const curSet=new Set(current);
+  const showAll=document.getElementById('p-yarn-allweights').checked;
+  const patId=document.getElementById('p-pattern').value;
+  const pat=patId?state.patterns.find(p=>p.id===patId):null;
+  const w=pat&&pat.weight?pat.weight:'';
+  const hint=document.getElementById('p-yarn-hint');
+  let list=state.yarn;
+  if(w&&!showAll){
+    list=state.yarn.filter(y=>y.weight===w||curSet.has(y.id));
+    hint.textContent='matching ‘'+w+'’ — the pattern’s weight';
+  }else{
+    hint.textContent=w&&showAll?'showing all weights':'';
+  }
+  if(!state.yarn.length){cont.innerHTML='<span style="font-size:12px;color:var(--ink-faint)">No yarn in stash — add one with “+ Add yarn”.</span>';return;}
+  if(!list.length){cont.innerHTML='<span style="font-size:12px;color:var(--ink-faint)">No ‘'+esc(w)+'’ yarn in your stash — tick “show all weights” or “+ Add yarn”.</span>';return;}
+  cont.innerHTML=list.map(y=>`<div class="chip-sel-item${curSet.has(y.id)?' selected':''}" data-id="${y.id}" onclick="this.classList.toggle('selected')"><span class="chip-dot" style="background:${y.colour}"></span>${esc(y.name)}${y.weight?` <span style="opacity:.5;font-size:10px">${esc(y.weight)}</span>`:''}</div>`).join('');
+}
+function addYarnFromProject(){
+  window.__addYarnToProject=true;
+  openYarnModal();
 }
 
 function renderEditPhotos(){
@@ -1684,7 +1816,7 @@ function renderYarn(){
     }
     const meta2=[y.fibre?esc(y.fibre):'',u.owned?u.owned+' yds total':'',y.skeins>1?'('+(+y.skeins)+' skeins)':''].filter(Boolean).join(' · ');
     const extra=[y.dyeLot?'Dye lot '+esc(y.dyeLot):'',y.cost!=null?'$'+(+y.cost).toFixed(2)+'/skein':'',y.source?esc(y.source):''].filter(Boolean).join(' · ');
-    return `<div class="yarn-card">${swatch}<div style="flex:1"><div class="yarn-name">${esc(y.name)}</div><div class="yarn-detail">${y.brand?esc(y.brand)+' · ':''}${y.colourName?esc(y.colourName):''}</div><div class="yarn-detail">${meta2}</div>${extra?`<div class="yarn-detail" style="opacity:.8">${extra}</div>`:''}${y.weight?`<span class="weight-badge">${y.weight}</span>`:''}${availBadge?'<div style="margin-top:5px">'+availBadge+'</div>':''}<div style="margin-top:8px;display:flex;gap:6px"><button class="btn-sm" onclick="openYarnModal('${y.id}')">Edit</button><button class="btn-sm danger" onclick="delYarn('${y.id}')">Delete</button></div></div></div>`;
+    return `<div class="yarn-card" onclick="openYarnDetail('${y.id}')" style="cursor:pointer">${swatch}<div style="flex:1"><div class="yarn-name">${esc(y.name)}</div><div class="yarn-detail">${y.brand?esc(y.brand)+' · ':''}${y.colourName?esc(y.colourName):''}</div><div class="yarn-detail">${meta2}</div>${extra?`<div class="yarn-detail" style="opacity:.8">${extra}</div>`:''}${y.weight?`<span class="weight-badge">${y.weight}</span>`:''}${availBadge?'<div style="margin-top:5px">'+availBadge+'</div>':''}<div style="margin-top:8px;display:flex;gap:6px"><button class="btn-sm" onclick="event.stopPropagation();openYarnModal('${y.id}')">Edit</button><button class="btn-sm danger" onclick="event.stopPropagation();delYarn('${y.id}')">Delete</button></div></div></div>`;
   }).join('');
 }
 
@@ -1729,7 +1861,18 @@ async function saveYarn(){
   if(error){showToast('Save failed: '+error.message);setSyncStatus('error','save error');return;}
   const yarn=dbToYarn(row);
   if(eYId){const i=state.yarn.findIndex(y=>y.id===eYId);state.yarn[i]=yarn;}else state.yarn.unshift(yarn);
-  setSyncStatus('','synced');showToast('Saved');closeModal('yarn-modal');renderYarn();
+  setSyncStatus('','synced');showToast('Saved');
+  if(window.__addYarnToProject&&!eYId){
+    window.__addYarnToProject=false;
+    const picker=document.getElementById('p-yarn-sel');
+    if(picker){
+      const cur=[...picker.querySelectorAll('.chip-sel-item.selected')].map(el=>el.dataset.id);
+      cur.push(yarn.id);
+      document.getElementById('p-yarn-allweights').checked=true;
+      renderProjectYarnPicker(cur);
+    }
+  }
+  closeModal('yarn-modal');renderYarn();
 }
 
 async function delYarn(id){
@@ -1739,6 +1882,37 @@ async function delYarn(id){
   await sb.from('yarn').delete().eq('id',id);
   state.yarn=state.yarn.filter(y=>y.id!==id);
   setSyncStatus('','synced');renderYarn();
+}
+
+function openYarnDetail(id){
+  const y=state.yarn.find(x=>x.id===id);if(!y)return;
+  const u=getYarnUsage(id);
+  document.getElementById('yd-title').textContent=y.name;
+  const sk=(+y.skeins||1);
+  const rows=[];
+  if(y.brand)rows.push(['Brand',esc(y.brand)]);
+  if(y.colourName)rows.push(['Colourway',esc(y.colourName)]);
+  if(y.weight)rows.push(['Weight',esc(y.weight)]);
+  if(y.fibre)rows.push(['Fibre',esc(y.fibre)]);
+  rows.push(['Yardage',(y.yardage||0)+' yds/skein · '+sk+' skein'+(sk!==1?'s':'')+' = '+u.owned+' yds']);
+  if(u.committed||u.used){
+    const parts=[];
+    if(u.committed)parts.push(u.committed+' committed');
+    if(u.used)parts.push(u.used+' used');
+    parts.push(u.available<0?('over by '+(-u.available)+' yds'):(u.available+' yds free'));
+    rows.push(['Availability',parts.join(' · ')]);
+  }
+  if(y.dyeLot)rows.push(['Dye lot',esc(y.dyeLot)]);
+  if(y.cost!=null)rows.push(['Cost','$'+(+y.cost).toFixed(2)+' / skein']);
+  if(y.source)rows.push(['Source',esc(y.source)]);
+  const using=(state.projects||[]).filter(p=>(p.yarnIds||[]).includes(id)).map(p=>esc(p.name));
+  if(using.length)rows.push(['In projects',using.join(', ')]);
+  const photo=y.photo
+    ?`<div style="text-align:center;margin-bottom:14px"><img src="${esc(y.photo)}" onclick="showLightbox('${esc(y.photo)}','${esc(y.name)}')" style="max-height:200px;max-width:100%;border-radius:3px;border:1px solid var(--border);cursor:zoom-in" title="Click to expand"></div>`
+    :`<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div class="yarn-swatch-lg" style="background:${y.colour}"></div><span style="font-family:var(--f-body);font-size:11px;color:var(--ink-faint)">No photo yet</span></div>`;
+  document.getElementById('yd-body').innerHTML=photo+'<table class="yd-table">'+rows.map(r=>`<tr><td class="yd-k">${r[0]}</td><td class="yd-v">${r[1]}</td></tr>`).join('')+'</table>'+(y.notes?`<div class="yd-notes">${esc(y.notes)}</div>`:'');
+  document.getElementById('yd-edit-btn').onclick=()=>{closeModal('yarn-detail-modal');openYarnModal(id);};
+  document.getElementById('yarn-detail-modal').classList.remove('hidden');
 }
 
 // ── NEEDLES ──
@@ -1872,28 +2046,44 @@ async function delAcquire(id){
 // ── PATTERNS ──
 function renderPatterns(){
   const el=document.getElementById('patterns-list');
-  if(!state.patterns.length){el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">No patterns yet</div><div class="empty-sub">Import a PDF to get started</div></div>';return;}
+  if(!state.patterns.length){el.innerHTML='<div class="empty-state"><div class="empty-title">No patterns yet</div><div class="empty-sub">Import a PDF to get started</div></div>';return;}
+  const fc=(document.getElementById('pat-filter-cat')||{}).value||'';
+  const sort=(document.getElementById('pat-sort')||{}).value||'category';
   const linked=new Set(state.projects.filter(p=>p.patternId).map(p=>p.patternId));
-  el.innerHTML=state.patterns.map(p=>`
-    <div class="pattern-card">
+  let list=state.patterns.filter(p=>!fc||p.category===fc);
+  if(sort==='name')list=[...list].sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sort==='category')list=[...list].sort((a,b)=>(a.category||'~~').localeCompare(b.category||'~~')||a.name.localeCompare(b.name));
+  // 'newest' keeps the default created_at-desc order
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-title">No patterns in this category</div><div class="empty-sub">Try a different filter</div></div>';return;}
+  el.innerHTML=list.map(p=>{
+    const meta=[p.category?esc(p.category):'',p.weight?esc(p.weight):'',linked.has(p.id)?'Linked to a project':'Not linked'].filter(Boolean).join(' · ');
+    return `<div class="pattern-card">
       <div class="pattern-card-inner">
         <div class="pattern-icon">📄</div>
         <div class="pattern-info">
           <div class="pattern-name">${esc(p.name)}</div>
-          <div class="pattern-meta">${linked.has(p.id)?'Linked to a project':'Not linked to a project'}</div>
+          <div class="pattern-meta">${meta}</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
-          <button class="btn-open" onclick="openPdf('${p.id}')">Open →</button>
+          ${p.pdfUrl?`<button class="btn-open" onclick="openPdf('${p.id}')">Open →</button>`:''}
+          <button class="btn-sm" onclick="openPatternModal('${p.id}')">Edit</button>
           <button class="btn-sm danger" onclick="delPattern('${p.id}')">Delete</button>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-function openPatternModal(){
+let ePatId=null;
+function openPatternModal(id){
+  ePatId=id||null;
   selectedPdfFile=null;
-  document.getElementById('pat-name').value='';
-  document.getElementById('pdf-upload-label').textContent='Click to choose a PDF file';
+  const p=id?state.patterns.find(x=>x.id===id):null;
+  document.getElementById('pat-modal-title').textContent=p?'Edit Pattern':'Add Pattern';
+  document.getElementById('pat-name').value=p?p.name:'';
+  document.getElementById('pat-category').value=p?(p.category||''):'';
+  document.getElementById('pat-weight').value=p?(p.weight||''):'';
+  document.getElementById('pdf-upload-label').textContent=p&&p.pdfUrl?'✓ PDF attached — choose to replace':'Click to choose a PDF file';
   document.getElementById('pat-modal').classList.remove('hidden');
 }
 
@@ -1906,6 +2096,32 @@ async function savePattern(){
   if(demoGuard())return;
   const name=document.getElementById('pat-name').value.trim();
   if(!name){showToast('Please enter a pattern name');return;}
+  const category=document.getElementById('pat-category').value||null;
+  const weight=document.getElementById('pat-weight').value||null;
+
+  if(ePatId){
+    // Editing an existing pattern — PDF optional (replace only if a new one is chosen)
+    const pat=state.patterns.find(p=>p.id===ePatId);if(!pat)return;
+    const upd={name,category,weight};
+    setSyncStatus('syncing','saving…');
+    if(selectedPdfFile){
+      showToast('Uploading PDF…',8000);
+      const path=`pdfs/${ePatId}-${selectedPdfFile.name.replace(/\s/g,'_')}`;
+      const{error:upErr}=await sb.storage.from('pdfs').upload(path,selectedPdfFile,{contentType:'application/pdf'});
+      if(upErr){showToast('PDF upload failed: '+upErr.message);setSyncStatus('error','upload error');return;}
+      if(pat.pdfPath)await sb.storage.from('pdfs').remove([pat.pdfPath]);
+      const{data:urlData}=sb.storage.from('pdfs').getPublicUrl(path);
+      upd.pdf_url=urlData.publicUrl;upd.pdf_path=path;
+    }
+    const{error:dbErr}=await sb.from('patterns').update(upd).eq('id',ePatId);
+    if(dbErr){showToast('Save failed: '+dbErr.message);setSyncStatus('error','save error');return;}
+    Object.assign(pat,{name,category:category||'',weight:weight||''});
+    if(upd.pdf_url){pat.pdfUrl=upd.pdf_url;pat.pdfPath=upd.pdf_path;}
+    setSyncStatus('','synced');showToast('Pattern saved');
+    closeModal('pat-modal');renderPatterns();selectedPdfFile=null;ePatId=null;
+    return;
+  }
+
   if(!selectedPdfFile){showToast('Please choose a PDF file');return;}
   const id=uid();
   const path=`pdfs/${id}-${selectedPdfFile.name.replace(/\s/g,'_')}`;
@@ -1914,10 +2130,10 @@ async function savePattern(){
   const{error:upErr}=await sb.storage.from('pdfs').upload(path,selectedPdfFile,{contentType:'application/pdf'});
   if(upErr){showToast('PDF upload failed: '+upErr.message);setSyncStatus('error','upload error');return;}
   const{data:urlData}=sb.storage.from('pdfs').getPublicUrl(path);
-  const row={id,name,pdf_url:urlData.publicUrl,pdf_path:path,notes:[],highlight_pos:{},counter:0,last_page:1};
+  const row={id,name,category,weight,pdf_url:urlData.publicUrl,pdf_path:path,notes:[],highlight_pos:{},counter:0,last_page:1};
   const{error:dbErr}=await sb.from('patterns').insert(row);
   if(dbErr){showToast('Save failed: '+dbErr.message);setSyncStatus('error','save error');return;}
-  state.patterns.unshift({id,name,notes:[],highlightPos:{},counter:1,pdfUrl:urlData.publicUrl,pdfPath:path});
+  state.patterns.unshift({id,name,category:category||'',weight:weight||'',notes:[],highlightPos:{},counter:1,pdfUrl:urlData.publicUrl,pdfPath:path});
   setSyncStatus('','synced');showToast('Pattern saved');
   closeModal('pat-modal');renderPatterns();
   selectedPdfFile=null;
@@ -1931,6 +2147,57 @@ async function delPattern(id){
   await sb.from('patterns').delete().eq('id',id);
   state.patterns=state.patterns.filter(p=>p.id!==id);
   renderPatterns();
+}
+
+// ── RESOURCES ──
+let eResId=null;
+function renderResources(){
+  const el=document.getElementById('resources-list');
+  if(!el)return;
+  const list=state.resources||[];
+  if(!list.length){el.innerHTML='<div class="home-empty">No techniques yet — add your first with “+ Add”.</div>';return;}
+  const labels={'Cast-on':'Cast-ons','Bind-off':'Bind-offs','Method':'Methods','Other':'Other'};
+  const order=['Cast-on','Bind-off','Method','Other'];
+  const groups={};list.forEach(r=>{const t=r.type||'Other';(groups[t]=groups[t]||[]).push(r);});
+  let html='';
+  order.forEach(t=>{
+    if(!groups[t])return;
+    html+=`<div class="res-group-lbl">${labels[t]}</div>`;
+    html+=groups[t].map(r=>`<div class="res-row"><div style="flex:1;min-width:0"><div class="res-row-title">${esc(r.title)}</div>${r.notes?`<div class="res-row-note">${esc(r.notes)}</div>`:''}</div>${r.url?`<a class="btn-open" href="${esc(r.url)}" target="_blank" rel="noopener">Watch →</a>`:`<span class="res-nolink">no link yet</span>`}<button class="btn-sm" onclick="openResourceModal('${r.id}')">Edit</button><button class="btn-sm danger" onclick="delResource('${r.id}')">✕</button></div>`).join('');
+  });
+  el.innerHTML=html;
+}
+function openResourceModal(id){
+  eResId=id||null;
+  const r=id?(state.resources||[]).find(x=>x.id===id):null;
+  document.getElementById('resource-modal-title').textContent=r?'Edit Resource':'Add Resource';
+  document.getElementById('res-title').value=r?r.title:'';
+  document.getElementById('res-type').value=r?(r.type||'Cast-on'):'Cast-on';
+  document.getElementById('res-url').value=r?(r.url||''):'';
+  document.getElementById('res-notes').value=r?(r.notes||''):'';
+  document.getElementById('resource-modal').classList.remove('hidden');
+}
+async function saveResource(){
+  if(demoGuard())return;
+  const title=document.getElementById('res-title').value.trim();
+  if(!title){showToast('Please enter a title');return;}
+  const existing=eResId?(state.resources||[]).find(x=>x.id===eResId):null;
+  const so=existing?existing.sort_order:((state.resources||[]).reduce((m,r)=>Math.max(m,r.sort_order||0),0)+1);
+  const row={id:eResId||uid(),title,type:document.getElementById('res-type').value,url:document.getElementById('res-url').value.trim()||null,notes:document.getElementById('res-notes').value.trim()||null,sort_order:so};
+  setSyncStatus('syncing','saving…');
+  const{error}=await sb.from('resources').upsert(row);
+  if(error){showToast('Save failed: '+error.message);setSyncStatus('error','save error');return;}
+  if(eResId){const i=state.resources.findIndex(x=>x.id===eResId);state.resources[i]=row;}else state.resources.push(row);
+  state.resources.sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  setSyncStatus('','synced');showToast('Saved');closeModal('resource-modal');renderResources();
+}
+async function delResource(id){
+  if(demoGuard())return;
+  if(!await confirmDialog('Remove this resource?',{title:'Remove resource',confirmText:'Remove',danger:true}))return;
+  setSyncStatus('syncing','deleting…');
+  await sb.from('resources').delete().eq('id',id);
+  state.resources=(state.resources||[]).filter(r=>r.id!==id);
+  setSyncStatus('','synced');renderResources();
 }
 
 // ── PDF VIEWER ──
