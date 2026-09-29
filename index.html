@@ -2592,7 +2592,7 @@ const pdfArea=document.getElementById('pdf-canvas-area');
 // Pinch-to-zoom + double-tap-to-zoom, handled by ONE consolidated touchend so the
 // gestures can't collide. Page changes are via the Prev/Next buttons only — the old
 // swipe-to-change-page was removed because it fired mid-pinch and flipped pages.
-let pinchDist0=0,pinchScale0=1,pinchActive=false,lastTap=0;
+let pinchDist0=0,pinchScale0=1,pinchActive=false,lastTap=0,drag=false;
 pdfArea.addEventListener('touchstart',e=>{
   if(e.touches.length>=2){
     pinchActive=true;
@@ -2610,6 +2610,7 @@ pdfArea.addEventListener('touchmove',e=>{
   }
 },{passive:false});
 pdfArea.addEventListener('touchend',e=>{
+  if(drag)return; // a row-highlight drag is finishing — never treat it as a tap/zoom/page-turn
   if(e.touches.length>0)return; // wait until every finger is lifted
   if(pinchActive){
     // A pinch just finished: apply the zoom once and never treat it as a tap
@@ -2625,7 +2626,7 @@ pdfArea.addEventListener('touchend',e=>{
 
 // Row highlight drag
 const hlEl=document.getElementById('row-highlight');
-let drag=false,dY=0,dT=0;
+let dY=0,dT=0;
 hlEl.addEventListener('mousedown',e=>{drag=true;dY=e.clientY;dT=parseInt(hlEl.style.top)||0;e.preventDefault();});
 hlEl.addEventListener('touchstart',e=>{drag=true;dY=e.touches[0].clientY;dT=parseInt(hlEl.style.top)||0;e.stopPropagation();},{passive:true});
 document.addEventListener('mousemove',e=>{if(!drag)return;const mx=document.getElementById('pdf-canvas').height-hlEl.offsetHeight;hlEl.style.top=Math.max(0,Math.min(mx,dT+e.clientY-dY))+'px';});
