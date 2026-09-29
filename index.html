@@ -1190,7 +1190,7 @@ let isDemoMode=false;
 let state={projects:[],yarn:[],needles:[],acquire:[],patterns:[],feedback:[],stashNotes:{yarn:'',needles:''},resources:[]};
 let ePId=null,eYId=null,eNId=null,eAId=null;
 let pdfDoc=null,pdfPage=1,pdfTotal=1,curPat=null,cVal=0,hlOn=false,nCollapsed=false;
-let pdfScale=1,pdfBaseScale=1;
+let pdfScale=1,pdfBaseScale=1,pdfRenderTask=null;
 let editPhotos=[];
 let selectedPdfFile=null;
 
@@ -1884,6 +1884,7 @@ async function delYarn(id){
   setSyncStatus('','synced');renderYarn();
 }
 
+function zoomYarnPhoto(id){const y=state.yarn.find(x=>x.id===id);if(y&&y.photo)showLightbox(y.photo,y.name);}
 function openYarnDetail(id){
   const y=state.yarn.find(x=>x.id===id);if(!y)return;
   const u=getYarnUsage(id);
@@ -1908,7 +1909,7 @@ function openYarnDetail(id){
   const using=(state.projects||[]).filter(p=>(p.yarnIds||[]).includes(id)).map(p=>esc(p.name));
   if(using.length)rows.push(['In projects',using.join(', ')]);
   const photo=y.photo
-    ?`<div style="text-align:center;margin-bottom:14px"><img src="${esc(y.photo)}" onclick="showLightbox('${esc(y.photo)}','${esc(y.name)}')" style="max-height:200px;max-width:100%;border-radius:3px;border:1px solid var(--border);cursor:zoom-in" title="Click to expand"></div>`
+    ?`<div style="text-align:center;margin-bottom:14px"><img src="${esc(y.photo)}" onclick="zoomYarnPhoto('${id}')" style="max-height:200px;max-width:100%;border-radius:3px;border:1px solid var(--border);cursor:zoom-in;touch-action:manipulation" title="Tap to expand"></div>`
     :`<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div class="yarn-swatch-lg" style="background:${y.colour}"></div><span style="font-family:var(--f-body);font-size:11px;color:var(--ink-faint)">No photo yet</span></div>`;
   document.getElementById('yd-body').innerHTML=photo+'<table class="yd-table">'+rows.map(r=>`<tr><td class="yd-k">${r[0]}</td><td class="yd-v">${r[1]}</td></tr>`).join('')+'</table>'+(y.notes?`<div class="yd-notes">${esc(y.notes)}</div>`:'');
   document.getElementById('yd-edit-btn').onclick=()=>{closeModal('yarn-detail-modal');openYarnModal(id);};
@@ -2233,8 +2234,12 @@ function renderPdfPage(fitToWidth){
     const scale=pdfBaseScale*pdfScale;
     const vp=page.getViewport({scale});
     const canvas=document.getElementById('pdf-canvas');
+    // Cancel any in-flight render before starting a new one — overlapping renders on
+    // the same canvas corrupt the output (the "image inverts" bug on rapid zoom).
+    if(pdfRenderTask){try{pdfRenderTask.cancel();}catch(_){}}
     canvas.width=vp.width;canvas.height=vp.height;
-    page.render({canvasContext:canvas.getContext('2d'),viewport:vp});
+    pdfRenderTask=page.render({canvasContext:canvas.getContext('2d'),viewport:vp});
+    pdfRenderTask.promise.then(()=>{pdfRenderTask=null;}).catch(()=>{});
     document.getElementById('pdf-page-info').textContent=pdfPage+' / '+pdfTotal;
     document.getElementById('zoom-info').textContent=Math.round(pdfScale*100)+'%';
     const hl=document.getElementById('row-highlight');
@@ -2584,33 +2589,39 @@ document.addEventListener('click',e=>{
   }
 });
 const pdfArea=document.getElementById('pdf-canvas-area');
-let pinchDist0=0,pinchScale0=1;
+// Pinch-to-zoom + double-tap-to-zoom, handled by ONE consolidated touchend so the
+// gestures can't collide. Page changes are via the Prev/Next buttons only — the old
+// swipe-to-change-page was removed because it fired mid-pinch and flipped pages.
+let pinchDist0=0,pinchScale0=1,pinchActive=false,lastTap=0;
 pdfArea.addEventListener('touchstart',e=>{
-if(e.touches.length===2){pinchDist0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pinchScale0=pdfScale;e.preventDefault();}
+  if(e.touches.length>=2){
+    pinchActive=true;
+    pinchDist0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    pinchScale0=pdfScale;
+    e.preventDefault();
+  }
 },{passive:false});
 pdfArea.addEventListener('touchmove',e=>{
-if(e.touches.length===2&&pinchDist0>0){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pdfScale=Math.min(4,Math.max(0.5,pinchScale0*(d/pinchDist0)));document.getElementById('zoom-info').textContent=Math.round(pdfScale*100)+'%';e.preventDefault();}
+  if(pinchActive&&e.touches.length>=2&&pinchDist0>0){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    pdfScale=Math.min(4,Math.max(0.5,pinchScale0*(d/pinchDist0)));
+    document.getElementById('zoom-info').textContent=Math.round(pdfScale*100)+'%';
+    e.preventDefault();
+  }
 },{passive:false});
-pdfArea.addEventListener('touchend',e=>{if(e.touches.length<2&&pinchDist0>0){pinchDist0=0;renderPdfPage(false);}});
-
-// Double tap zoom
-let lastTap=0;
 pdfArea.addEventListener('touchend',e=>{
-if(e.touches.length>0)return;
-const now=Date.now();
-if(now-lastTap<300){pdfScale=pdfScale>1.2?1:2;renderPdfPage(false);}
-lastTap=now;
+  if(e.touches.length>0)return; // wait until every finger is lifted
+  if(pinchActive){
+    // A pinch just finished: apply the zoom once and never treat it as a tap
+    pinchActive=false;pinchDist0=0;lastTap=0;
+    renderPdfPage(false);
+    return;
+  }
+  // Genuine single-finger tap → double-tap-to-zoom
+  const now=Date.now();
+  if(now-lastTap<300){pdfScale=pdfScale>1.2?1:2;renderPdfPage(false);lastTap=0;}
+  else lastTap=now;
 });
-
-// Swipe pages
-let swipeX=0,swipeY=0;
-pdfArea.addEventListener('touchstart',e=>{if(e.touches.length===1){swipeX=e.touches[0].clientX;swipeY=e.touches[0].clientY;}},{passive:true});
-pdfArea.addEventListener('touchend',e=>{
-if(e.changedTouches.length===1&&pinchDist0===0){
-const dx=e.changedTouches[0].clientX-swipeX,dy=e.changedTouches[0].clientY-swipeY;
-if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){if(dx<0)changePage(1);else changePage(-1);}
-}
-},{passive:true});
 
 // Row highlight drag
 const hlEl=document.getElementById('row-highlight');
